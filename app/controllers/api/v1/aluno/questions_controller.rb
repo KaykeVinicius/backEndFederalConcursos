@@ -1,0 +1,38 @@
+module Api
+  module V1
+    module Aluno
+      class QuestionsController < ApplicationController
+        before_action :require_aluno!
+
+        def index
+          student = current_user.student
+          @questions = student.questions.includes(:professor, :lesson, :subject)
+                              .order(created_at: :desc)
+          render json: @questions, each_serializer: QuestionSerializer
+        end
+
+        def create
+          student = current_user.student
+          lesson  = Lesson.find(params[:lesson_id])
+          subject = lesson.subject
+
+          @question = Question.new(
+            student:     student,
+            professor:   subject.professor,
+            lesson:      lesson,
+            subject:     subject,
+            text:        params[:text],
+            video_moment: params[:video_moment]
+          )
+
+          if @question.save
+            # TODO: Send email notification to professor (ActionMailer)
+            render json: @question, serializer: QuestionSerializer, status: :created
+          else
+            render json: { errors: @question.errors.full_messages }, status: :unprocessable_entity
+          end
+        end
+      end
+    end
+  end
+end
