@@ -11,6 +11,15 @@ class Enrollment < ApplicationRecord
 
   validates :started_at, presence: true
 
+  after_create  :check_turma_capacity
+  after_destroy :check_turma_capacity
+
+  private
+
+  def check_turma_capacity
+    turma.auto_close_if_full!
+  end
+
   def total_paid
     total_paid_cents.to_f / 100
   end

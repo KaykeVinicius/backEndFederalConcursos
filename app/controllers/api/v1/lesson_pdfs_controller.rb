@@ -10,6 +10,15 @@ module Api
 
       def create
         @pdf = LessonPdf.new(pdf_params)
+
+        if params[:file].present?
+          @pdf.file.attach(params[:file])
+          @pdf.file_size ||= begin
+            size = params[:file].size
+            size < 1_048_576 ? "#{(size / 1024.0).round(1)} KB" : "#{(size / 1_048_576.0).round(1)} MB"
+          end
+        end
+
         if @pdf.save
           render json: @pdf, serializer: LessonPdfSerializer, status: :created
         else

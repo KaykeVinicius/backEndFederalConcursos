@@ -36,9 +36,13 @@ module Api
       end
 
       def enrollment_params
-        params.permit(:student_id, :course_id, :turma_id, :career_id,
-                      :status, :started_at, :expires_at, :enrollment_type,
-                      :payment_method, :total_paid, :contract_signed)
+        permitted = params.permit(:student_id, :course_id, :turma_id, :career_id,
+                                  :status, :started_at, :expires_at, :enrollment_type,
+                                  :payment_method, :total_paid, :contract_signed)
+        if permitted.key?(:total_paid)
+          permitted[:total_paid_cents] = (permitted.delete(:total_paid).to_f * 100).round
+        end
+        permitted
       end
     end
   end

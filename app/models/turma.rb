@@ -11,8 +11,13 @@ class Turma < ApplicationRecord
   validates :name,       presence: true
   validates :start_date, presence: true
   validates :end_date,   presence: true
+  validates :modalidade, inclusion: { in: %w[presencial hibrido] }
 
   def enrolled_count
     enrollments.where(status: :active).count
+  end
+
+  def auto_close_if_full!
+    update_column(:status, :fechada) if enrolled_count >= max_students && status != "fechada"
   end
 end

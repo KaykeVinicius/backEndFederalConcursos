@@ -46,7 +46,7 @@ module Api
 
       def turma_params
         params.permit(:course_id, :professor_id, :name, :shift, :start_date,
-                      :end_date, :schedule, :max_students, :status)
+                      :end_date, :schedule, :max_students, :status, :modalidade)
       end
     end
   end

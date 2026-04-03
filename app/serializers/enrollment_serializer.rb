@@ -5,5 +5,5 @@ class EnrollmentSerializer < ActiveModel::Serializer
   belongs_to :student, serializer: StudentSerializer
   belongs_to :course,  serializer: CourseSerializer
   belongs_to :turma,   serializer: TurmaSerializer
-  belongs_to :career,  serializer: CareerSerializer
+  belongs_to :career,  serializer: CareerSerializer, optional: true
 end
