@@ -3,7 +3,7 @@ module Api
     module Professor
       class QuestionsController < ApplicationController
         before_action :require_professor!
-        before_action :set_question, only: [:show, :update, :answer]
+        before_action :set_question, only: [:show, :answer]
 
         def index
           @questions = Question.where(professor_id: current_user.id)
@@ -20,6 +20,7 @@ module Api
         # PATCH /api/v1/professor/questions/:id/answer
         def answer
           if @question.answer!(params[:answer])
+            QuestionMailer.question_answered(@question).deliver_later
             render json: @question, serializer: QuestionSerializer
           else
             render json: { errors: @question.errors.full_messages }, status: :unprocessable_entity

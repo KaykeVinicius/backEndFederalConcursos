@@ -8,6 +8,7 @@ Rails.application.routes.draw do
       get    "auth/me",    to: "auth#me"
 
       # Admin / Pedagógica
+      resources :users
       resources :students
       resources :careers
       resources :courses do

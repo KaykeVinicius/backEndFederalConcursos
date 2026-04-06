@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body { font-family: Arial, sans-serif; color: #333; background: #f5f5f5; margin: 0; padding: 0; }
+    .container { max-width: 600px; margin: 30px auto; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    .header { background: #16a34a; padding: 24px 32px; }
+    .header h1 { color: #fff; margin: 0; font-size: 20px; }
+    .header p { color: rgba(255,255,255,0.85); margin: 4px 0 0; font-size: 14px; }
+    .body { padding: 32px; }
+    .label { font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; color: #888; margin-bottom: 4px; }
+    .value { font-size: 15px; color: #333; margin-bottom: 20px; }
+    .question-box { background: #f9f9f9; border-left: 4px solid #aaa; padding: 16px; border-radius: 4px; margin: 16px 0; }
+    .answer-box { background: #f0fdf4; border-left: 4px solid #16a34a; padding: 16px; border-radius: 4px; margin: 16px 0; }
+    .footer { padding: 20px 32px; background: #f9f9f9; font-size: 12px; color: #888; border-top: 1px solid #eee; }
+    .btn { display: inline-block; background: #16a34a; color: #fff; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold; margin-top: 16px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Sua dúvida foi respondida!</h1>
+      <p>Matéria: <%= @subject.name %></p>
+    </div>
+    <div class="body">
+      <p>Olá, <strong><%= @student.name.split(" ").first %></strong>!</p>
+      <p>O professor <strong><%= @professor.name %></strong> respondeu sua dúvida sobre a aula <strong><%= @lesson.title %></strong>.</p>
+
+      <div class="label">Sua dúvida</div>
+      <div class="question-box">
+        <p style="margin:0; line-height: 1.6; color: #666;"><%= @question.text %></p>
+      </div>
+
+      <div class="label">Resposta do professor</div>
+      <div class="answer-box">
+        <p style="margin:0; line-height: 1.6;"><%= @question.answer %></p>
+      </div>
+
+      <a href="http://localhost:3000/aluno/meus-cursos" class="btn">Ver no portal</a>
+    </div>
+    <div class="footer">
+      Federal Concursos — Este é um e-mail automático, não responda diretamente.
+    </div>
+  </div>
+</body>
+</html>

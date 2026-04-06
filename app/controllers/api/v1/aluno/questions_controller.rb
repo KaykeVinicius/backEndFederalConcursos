@@ -16,17 +16,22 @@ module Api
           lesson  = Lesson.find(params[:lesson_id])
           subject = lesson.subject
 
+          unless subject.professor
+            render json: { error: "Esta matéria não possui professor atribuído. Entre em contato com a secretaria." }, status: :unprocessable_entity
+            return
+          end
+
           @question = Question.new(
-            student:     student,
-            professor:   subject.professor,
-            lesson:      lesson,
-            subject:     subject,
-            text:        params[:text],
+            student:      student,
+            professor:    subject.professor,
+            lesson:       lesson,
+            subject:      subject,
+            text:         params[:text],
             video_moment: params[:video_moment]
           )
 
           if @question.save
-            # TODO: Send email notification to professor (ActionMailer)
+            QuestionMailer.new_question(@question).deliver_later
             render json: @question, serializer: QuestionSerializer, status: :created
           else
             render json: { errors: @question.errors.full_messages }, status: :unprocessable_entity

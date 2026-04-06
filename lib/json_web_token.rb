@@ -1,6 +1,6 @@
 module JsonWebToken
   SECRET_KEY = ENV.fetch("JWT_SECRET", "federal_concursos_dev_secret")
-  EXPIRATION = ENV.fetch("JWT_EXPIRATION_HOURS", "24").to_i.hours
+  EXPIRATION = ENV.fetch("JWT_EXPIRATION_HOURS", "168").to_i.hours
 
   def self.encode(payload)
     payload[:exp] = EXPIRATION.from_now.to_i
