@@ -6,6 +6,7 @@ gem "puma", ">= 5.0"
 gem "bcrypt", "~> 3.1.7"
 gem "jwt", "~> 2.9"
 gem "rack-cors"
+gem "hexapdf"
 gem "active_model_serializers", "~> 0.10"
 gem "dotenv-rails", groups: [:development, :test]
 gem "tzinfo-data", platforms: %i[ windows jruby ]

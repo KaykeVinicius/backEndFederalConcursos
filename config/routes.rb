@@ -39,6 +39,9 @@ Rails.application.routes.draw do
         get "dashboard", to: "dashboard#index"
         resources :questions,          only: [:index, :create]
         resources :lesson_completions, only: [:index, :create, :destroy]
+        resources :lesson_pdfs,        only: [] do
+          member { get :download }
+        end
       end
     end
   end
