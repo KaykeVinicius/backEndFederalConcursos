@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_04_01_194245) do
+ActiveRecord::Schema[8.0].define(version: 2026_04_08_013211) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -100,6 +100,19 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_01_194245) do
     t.index ["turma_id"], name: "index_enrollments_on_turma_id"
   end
 
+  create_table "event_registrations", force: :cascade do |t|
+    t.bigint "event_id", null: false
+    t.bigint "student_id", null: false
+    t.string "ticket_token"
+    t.boolean "attended"
+    t.datetime "attended_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["event_id"], name: "index_event_registrations_on_event_id"
+    t.index ["student_id"], name: "index_event_registrations_on_student_id"
+    t.index ["ticket_token"], name: "index_event_registrations_on_ticket_token", unique: true
+  end
+
   create_table "events", force: :cascade do |t|
     t.bigint "course_id"
     t.string "title", null: false
@@ -114,6 +127,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_01_194245) do
     t.integer "status", default: 0, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.decimal "price", precision: 10, scale: 2, default: "0.0"
+    t.boolean "is_free", default: true, null: false
     t.index ["course_id"], name: "index_events_on_course_id"
   end
 
@@ -194,6 +209,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_01_194245) do
     t.boolean "active", default: true, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "instagram"
     t.index ["cpf"], name: "index_students_on_cpf", unique: true
     t.index ["email"], name: "index_students_on_email", unique: true
     t.index ["user_id"], name: "index_students_on_user_id"
@@ -261,6 +277,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_01_194245) do
   add_foreign_key "enrollments", "courses"
   add_foreign_key "enrollments", "students"
   add_foreign_key "enrollments", "turmas"
+  add_foreign_key "event_registrations", "events"
+  add_foreign_key "event_registrations", "students"
   add_foreign_key "events", "courses"
   add_foreign_key "lesson_completions", "lessons"
   add_foreign_key "lesson_completions", "students"

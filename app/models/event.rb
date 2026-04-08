@@ -3,6 +3,8 @@ class Event < ApplicationRecord
   enum :status,     { agendado: 0, em_andamento: 1, concluido: 2, cancelado: 3 }
 
   belongs_to :course, optional: true
+  has_many :event_registrations, dependent: :destroy
+  has_many :students, through: :event_registrations
 
   validates :title,      presence: true
   validates :date,       presence: true

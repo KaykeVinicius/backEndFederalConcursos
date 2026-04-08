@@ -19,7 +19,12 @@ Rails.application.routes.draw do
       resources :turmas
       resources :enrollments
       resources :contracts, only: [:index, :show, :create, :update]
-      resources :events
+      resources :events do
+        resources :registrations, only: [:index, :create, :destroy],
+                  controller: "event_registrations"
+      end
+      patch "event_registrations/checkin", to: "event_registrations#checkin"
+      patch "event_registrations/:id/undo_checkin", to: "event_registrations#undo_checkin"
       resources :topics
       resources :lessons
       resources :lesson_pdfs, only: [:index, :create, :destroy]

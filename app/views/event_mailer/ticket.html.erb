@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ingresso — <%= @event.title %></title>
+  <style>
+    body { margin: 0; padding: 0; background: #f1f5f9; font-family: Arial, sans-serif; color: #1a1a2e; }
+    .wrapper { max-width: 540px; margin: 32px auto; background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.10); }
+    .header { background: #1a1a2e; padding: 28px 32px; text-align: center; }
+    .header h1 { margin: 0; font-size: 28px; letter-spacing: 3px; }
+    .header h1 span.fed { color: #e8491d; }
+    .header h1 span.cur { color: #ffffff; }
+    .accent { height: 4px; background: #e8491d; }
+    .body { padding: 28px 32px; }
+    .greeting { font-size: 15px; margin-bottom: 20px; color: #475569; }
+    .greeting strong { color: #1a1a2e; }
+    .ticket { border: 2px dashed #e8491d; border-radius: 12px; overflow: hidden; margin: 24px 0; }
+    .ticket-header { background: #e8491d; color: #fff; padding: 14px 20px; }
+    .ticket-header p { margin: 0; font-size: 11px; text-transform: uppercase; letter-spacing: 2px; opacity: 0.85; }
+    .ticket-header h2 { margin: 4px 0 0; font-size: 20px; }
+    .ticket-body { padding: 20px; display: flex; gap: 20px; align-items: center; }
+    .ticket-info { flex: 1; }
+    .ticket-info .row { margin-bottom: 10px; }
+    .ticket-info .label { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: #94a3b8; margin-bottom: 2px; }
+    .ticket-info .value { font-size: 14px; font-weight: bold; color: #1a1a2e; }
+    .qr-wrap { text-align: center; }
+    .qr-wrap img { width: 130px; height: 130px; display: block; }
+    .qr-wrap p { margin: 6px 0 0; font-size: 10px; color: #94a3b8; }
+    .token-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 16px; text-align: center; margin-top: 8px; }
+    .token-box p { margin: 0; font-size: 11px; color: #64748b; }
+    .token-box code { font-size: 12px; color: #e8491d; font-weight: bold; letter-spacing: 1px; }
+    .footer { background: #f8fafc; padding: 18px 32px; text-align: center; border-top: 1px solid #e2e8f0; }
+    .footer p { margin: 0; font-size: 11px; color: #94a3b8; }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <div class="header">
+      <h1><span class="fed">FEDERAL</span><span class="cur"> CURSOS</span></h1>
+    </div>
+    <div class="accent"></div>
+
+    <div class="body">
+      <p class="greeting">Olá, <strong><%= @student.name %></strong>! Sua inscrição foi confirmada. Apresente o QR Code abaixo na entrada do evento.</p>
+
+      <div class="ticket">
+        <div class="ticket-header">
+          <p>Ingresso oficial</p>
+          <h2><%= @event.title %></h2>
+        </div>
+        <div class="ticket-body">
+          <div class="ticket-info">
+            <div class="row">
+              <div class="label">Data</div>
+              <div class="value"><%= @event.date.strftime("%d/%m/%Y") %></div>
+            </div>
+            <div class="row">
+              <div class="label">Horário</div>
+              <div class="value"><%= @event.start_time %> – <%= @event.end_time %></div>
+            </div>
+            <% if @event.location.present? %>
+            <div class="row">
+              <div class="label">Local</div>
+              <div class="value"><%= @event.location %></div>
+            </div>
+            <% end %>
+            <div class="row">
+              <div class="label">Participante</div>
+              <div class="value"><%= @student.name %></div>
+            </div>
+            <div class="row">
+              <div class="label">Tipo</div>
+              <div class="value"><%= @event.is_free? ? "Gratuito" : "R$ #{format('%.2f', @event.price)}" %></div>
+            </div>
+          </div>
+          <div class="qr-wrap">
+            <img src="<%= @qr_cid %>" alt="QR Code" />
+            <p>Escaneie na entrada</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="token-box">
+        <p>Código do ingresso</p>
+        <code><%= @token %></code>
+      </div>
+    </div>
+
+    <div class="footer">
+      <p>Federal Cursos — R. Getúlio Vargas, 2634, Porto Velho – RO</p>
+      <p style="margin-top:4px;">Este é um e-mail automático, não responda.</p>
+    </div>
+  </div>
+</body>
+</html>

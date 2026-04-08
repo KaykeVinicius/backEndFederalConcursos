@@ -43,7 +43,7 @@ module Api
 
       def event_params
         params.permit(:title, :description, :event_type, :date, :start_time,
-                      :end_time, :location, :course_id, :max_participants, :status)
+                      :end_time, :location, :course_id, :max_participants, :status, :is_free, :price)
       end
     end
   end

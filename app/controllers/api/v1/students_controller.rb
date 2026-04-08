@@ -42,7 +42,7 @@ module Api
       end
 
       def student_params
-        params.permit(:name, :email, :whatsapp, :cpf, :address, :internal, :active)
+        params.permit(:name, :email, :whatsapp, :cpf, :instagram, :address, :internal, :active)
       end
     end
   end

@@ -11,6 +11,8 @@ gem "active_model_serializers", "~> 0.10"
 gem "dotenv-rails", groups: [:development, :test]
 gem "tzinfo-data", platforms: %i[ windows jruby ]
 gem "bootsnap", require: false
+gem "rqrcode"
+gem "chunky_png"
 
 group :development, :test do
   gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"
