@@ -7,6 +7,12 @@ Rails.application.routes.draw do
       post   "auth/login", to: "auth#login"
       get    "auth/me",    to: "auth#me"
 
+      # Notificações
+      resources :notifications, only: [:index] do
+        collection { patch :mark_all_read }
+        member     { patch :mark_read }
+      end
+
       # Admin / Pedagógica
       resources :users
       resources :students
@@ -24,6 +30,10 @@ Rails.application.routes.draw do
                   controller: "event_registrations"
         resources :lotes, only: [:index, :create, :update, :destroy],
                   controller: "event_lotes"
+        member do
+          get  :subjects,      to: "event_subjects#index"
+          post :sync_subjects, to: "event_subjects#sync"
+        end
       end
       patch "event_registrations/checkin", to: "event_registrations#checkin"
       patch "event_registrations/:id/undo_checkin", to: "event_registrations#undo_checkin"
@@ -34,8 +44,9 @@ Rails.application.routes.draw do
       # Professor namespace
       namespace :professor do
         get "dashboard", to: "dashboard#index"
-        resources :turmas,    only: [:index, :show]
+        resources :turmas,          only: [:index, :show]
         resources :materials
+        resources :event_materials, only: [:index, :create, :destroy]
         resources :questions, only: [:index, :show, :update] do
           member { patch :answer }
         end
@@ -47,6 +58,7 @@ Rails.application.routes.draw do
         resources :questions,           only: [:index, :create]
         resources :lesson_completions,  only: [:index, :create, :destroy]
         resources :event_registrations, only: [:index]
+        resources :event_materials,     only: [:index]
         resources :lesson_pdfs,        only: [] do
           member { get :download }
         end

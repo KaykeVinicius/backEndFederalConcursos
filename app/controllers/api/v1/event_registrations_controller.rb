@@ -45,6 +45,10 @@ module Api
           return render json: { error: "Ingresso não encontrado." }, status: :not_found
         end
 
+        if registration.event.date < Date.today
+          return render json: { error: "Ingresso expirado. Este evento já ocorreu." }, status: :unprocessable_entity
+        end
+
         if registration.attended?
           return render json: {
             error: "Presença já registrada.",

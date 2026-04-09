@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_04_08_020002) do
+ActiveRecord::Schema[8.0].define(version: 2026_04_09_200001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -111,6 +111,20 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_08_020002) do
     t.index ["event_id"], name: "index_event_lotes_on_event_id"
   end
 
+  create_table "event_materials", force: :cascade do |t|
+    t.bigint "event_id", null: false
+    t.bigint "subject_id", null: false
+    t.bigint "professor_id", null: false
+    t.string "title", null: false
+    t.string "file_size"
+    t.datetime "expires_at", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["event_id"], name: "index_event_materials_on_event_id"
+    t.index ["professor_id"], name: "index_event_materials_on_professor_id"
+    t.index ["subject_id"], name: "index_event_materials_on_subject_id"
+  end
+
   create_table "event_registrations", force: :cascade do |t|
     t.bigint "event_id", null: false
     t.bigint "student_id", null: false
@@ -124,6 +138,16 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_08_020002) do
     t.index ["event_lote_id"], name: "index_event_registrations_on_event_lote_id"
     t.index ["student_id"], name: "index_event_registrations_on_student_id"
     t.index ["ticket_token"], name: "index_event_registrations_on_ticket_token", unique: true
+  end
+
+  create_table "event_subjects", force: :cascade do |t|
+    t.bigint "event_id", null: false
+    t.bigint "subject_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["event_id", "subject_id"], name: "index_event_subjects_on_event_id_and_subject_id", unique: true
+    t.index ["event_id"], name: "index_event_subjects_on_event_id"
+    t.index ["subject_id"], name: "index_event_subjects_on_subject_id"
   end
 
   create_table "events", force: :cascade do |t|
@@ -191,6 +215,20 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_08_020002) do
     t.index ["professor_id"], name: "index_materials_on_professor_id"
     t.index ["subject_id"], name: "index_materials_on_subject_id"
     t.index ["turma_id"], name: "index_materials_on_turma_id"
+  end
+
+  create_table "notifications", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.string "notifiable_type", null: false
+    t.integer "notifiable_id", null: false
+    t.string "title", null: false
+    t.string "body"
+    t.datetime "read_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["notifiable_type", "notifiable_id"], name: "index_notifications_on_notifiable_type_and_notifiable_id"
+    t.index ["user_id", "read_at"], name: "index_notifications_on_user_id_and_read_at"
+    t.index ["user_id"], name: "index_notifications_on_user_id"
   end
 
   create_table "questions", force: :cascade do |t|
@@ -291,9 +329,14 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_08_020002) do
   add_foreign_key "enrollments", "students"
   add_foreign_key "enrollments", "turmas"
   add_foreign_key "event_lotes", "events"
+  add_foreign_key "event_materials", "events"
+  add_foreign_key "event_materials", "subjects"
+  add_foreign_key "event_materials", "users", column: "professor_id"
   add_foreign_key "event_registrations", "event_lotes"
   add_foreign_key "event_registrations", "events"
   add_foreign_key "event_registrations", "students"
+  add_foreign_key "event_subjects", "events"
+  add_foreign_key "event_subjects", "subjects"
   add_foreign_key "events", "courses"
   add_foreign_key "lesson_completions", "lessons"
   add_foreign_key "lesson_completions", "students"
@@ -302,6 +345,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_08_020002) do
   add_foreign_key "materials", "subjects"
   add_foreign_key "materials", "turmas"
   add_foreign_key "materials", "users", column: "professor_id"
+  add_foreign_key "notifications", "users"
   add_foreign_key "questions", "lessons"
   add_foreign_key "questions", "students"
   add_foreign_key "questions", "subjects"

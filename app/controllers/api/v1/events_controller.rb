@@ -16,6 +16,14 @@ module Api
       def create
         @event = Event.new(event_params)
         if @event.save
+          type_label = @event.aulao? ? "Aulão" : "Simulado"
+          date_br    = @event.date.strftime("%d/%m/%Y")
+          Notification.broadcast(
+            notifiable:      @event,
+            title:           "Novo #{type_label}: #{@event.title}",
+            body:            "#{date_br}#{@event.location ? " — #{@event.location}" : ""}",
+            except_user_id:  current_user.id
+          )
           render json: @event, serializer: EventSerializer, status: :created
         else
           render json: { errors: @event.errors.full_messages }, status: :unprocessable_entity

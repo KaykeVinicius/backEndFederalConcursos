@@ -15,6 +15,7 @@ class User < ApplicationRecord
   has_many :turmas_managed,   class_name: "Turma",    foreign_key: :professor_id
   has_many :questions_received, class_name: "Question", foreign_key: :professor_id
   has_many :materials,        foreign_key: :professor_id
+  has_many :notifications,    dependent: :destroy
 
   validates :name,  presence: true
   validates :email, presence: true, uniqueness: { case_sensitive: false }

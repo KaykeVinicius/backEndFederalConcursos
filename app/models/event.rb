@@ -5,7 +5,10 @@ class Event < ApplicationRecord
   belongs_to :course, optional: true
   has_many :event_lotes,         dependent: :destroy
   has_many :event_registrations, dependent: :destroy
-  has_many :students, through: :event_registrations
+  has_many :students,            through: :event_registrations
+  has_many :event_subjects,      dependent: :destroy
+  has_many :subjects,            through: :event_subjects
+  has_many :event_materials,     dependent: :destroy
 
   def full?
     registered_count >= max_participants

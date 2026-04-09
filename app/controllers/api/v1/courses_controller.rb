@@ -16,6 +16,12 @@ module Api
       def create
         @course = Course.new(course_params)
         if @course.save
+          Notification.broadcast(
+            notifiable:      @course,
+            title:           "Novo Curso: #{@course.title}",
+            body:            @course.description&.truncate(80),
+            except_user_id:  current_user&.id
+          )
           render json: @course, serializer: CourseSerializer, status: :created
         else
           render json: { errors: @course.errors.full_messages }, status: :unprocessable_entity

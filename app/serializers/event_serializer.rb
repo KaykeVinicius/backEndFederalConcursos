@@ -4,7 +4,8 @@ class EventSerializer < ActiveModel::Serializer
              :status, :is_free, :price, :course_id, :created_at, :is_full,
              :current_lote_price
 
-  has_many :event_lotes, serializer: EventLoteSerializer
+  has_many :event_lotes,    serializer: EventLoteSerializer
+  has_many :event_subjects, serializer: EventSubjectSerializer
 
   def is_full
     object.full?
