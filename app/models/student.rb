@@ -1,5 +1,8 @@
 class Student < ApplicationRecord
+  enum :situacao, { online: 0, presencial: 1, hibrido: 2 }
+
   belongs_to :user, optional: true
+  belongs_to :city, optional: true
 
   has_many :enrollments
   has_many :courses,             through: :enrollments

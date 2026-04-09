@@ -2,6 +2,7 @@ module Api
   module V1
     class TurmasController < ApplicationController
       before_action :set_turma, only: [:show, :update, :destroy]
+      before_action(only: [:create, :update, :destroy]) { require_role!(:ceo, :diretor, :equipe_pedagogica) }
 
       def index
         @turmas = if params[:course_id]

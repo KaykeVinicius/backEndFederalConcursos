@@ -2,6 +2,7 @@ module Api
   module V1
     class LessonsController < ApplicationController
       before_action :set_lesson, only: [:show, :update, :destroy]
+      before_action(only: [:create, :update, :destroy]) { require_role!(:ceo, :diretor, :equipe_pedagogica) }
 
       def index
         @lessons = if params[:topic_id]

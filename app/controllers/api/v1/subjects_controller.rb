@@ -2,6 +2,7 @@ module Api
   module V1
     class SubjectsController < ApplicationController
       before_action :set_subject, only: [:show, :update, :destroy]
+      before_action(only: [:create, :update, :destroy]) { require_role!(:ceo, :diretor, :equipe_pedagogica) }
 
       def index
         @subjects = if params[:course_id]

@@ -15,6 +15,8 @@ Rails.application.routes.draw do
 
       # Admin / Pedagógica
       resources :users
+      resources :user_types
+      resources :cities, only: [:index]
       resources :students
       resources :careers
       resources :courses do

@@ -42,11 +42,11 @@ module Api
       end
 
       def user_params
-        params.permit(:name, :email, :cpf, :password, :role, :commission_percent, :active)
+        params.permit(:name, :email, :cpf, :password, :role, :commission_percent, :active, :user_type_id)
       end
 
       def update_params
-        p = params.permit(:name, :email, :cpf, :password, :role, :commission_percent, :active)
+        p = params.permit(:name, :email, :cpf, :password, :role, :commission_percent, :active, :user_type_id)
         p.delete(:password) if p[:password].blank?
         p
       end

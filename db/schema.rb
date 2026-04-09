@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_04_09_200001) do
+ActiveRecord::Schema[8.0].define(version: 2026_04_10_110001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -47,6 +47,16 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_09_200001) do
     t.text "description"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "cities", force: :cascade do |t|
+    t.string "name", null: false
+    t.string "state", limit: 2, null: false
+    t.string "ibge_code"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["ibge_code"], name: "index_cities_on_ibge_code", unique: true, where: "(ibge_code IS NOT NULL)"
+    t.index ["name", "state"], name: "index_cities_on_name_and_state", unique: true
   end
 
   create_table "contracts", force: :cascade do |t|
@@ -255,12 +265,19 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_09_200001) do
     t.string "email", null: false
     t.string "whatsapp"
     t.string "cpf", null: false
-    t.text "address"
+    t.text "street"
     t.boolean "internal", default: true, null: false
     t.boolean "active", default: true, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "instagram"
+    t.integer "situacao", default: 0, null: false
+    t.string "address_number"
+    t.string "address_complement"
+    t.string "neighborhood"
+    t.string "cep"
+    t.bigint "city_id"
+    t.index ["city_id"], name: "index_students_on_city_id"
     t.index ["cpf"], name: "index_students_on_cpf", unique: true
     t.index ["email"], name: "index_students_on_email", unique: true
     t.index ["user_id"], name: "index_students_on_user_id"
@@ -304,6 +321,17 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_09_200001) do
     t.index ["professor_id"], name: "index_turmas_on_professor_id"
   end
 
+  create_table "user_types", force: :cascade do |t|
+    t.string "name", null: false
+    t.string "slug", null: false
+    t.string "description"
+    t.boolean "active", default: true, null: false
+    t.integer "position", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["slug"], name: "index_user_types_on_slug", unique: true
+  end
+
   create_table "users", force: :cascade do |t|
     t.string "name", null: false
     t.string "email", null: false
@@ -314,8 +342,10 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_09_200001) do
     t.boolean "active", default: true, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "user_type_id"
     t.index ["cpf"], name: "index_users_on_cpf", unique: true
     t.index ["email"], name: "index_users_on_email", unique: true
+    t.index ["user_type_id"], name: "index_users_on_user_type_id"
   end
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
@@ -350,10 +380,12 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_09_200001) do
   add_foreign_key "questions", "students"
   add_foreign_key "questions", "subjects"
   add_foreign_key "questions", "users", column: "professor_id"
+  add_foreign_key "students", "cities"
   add_foreign_key "students", "users"
   add_foreign_key "subjects", "courses"
   add_foreign_key "subjects", "users", column: "professor_id"
   add_foreign_key "topics", "subjects"
   add_foreign_key "turmas", "courses"
   add_foreign_key "turmas", "users", column: "professor_id"
+  add_foreign_key "users", "user_types"
 end

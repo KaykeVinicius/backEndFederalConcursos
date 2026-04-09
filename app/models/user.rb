@@ -10,6 +10,11 @@ class User < ApplicationRecord
     diretor: 5
   }
 
+  belongs_to :user_type, optional: true
+
+  # Sincroniza role a partir do user_type quando user_type_id mudar
+  before_validation :sync_role_from_user_type
+
   has_one  :student
   has_many :subjects_taught,  class_name: "Subject",  foreign_key: :professor_id
   has_many :turmas_managed,   class_name: "Turma",    foreign_key: :professor_id
@@ -28,5 +33,11 @@ class User < ApplicationRecord
 
   def aluno?
     role == "aluno"
+  end
+
+  private
+
+  def sync_role_from_user_type
+    self.role = user_type.slug if user_type.present? && user_type.slug.present?
   end
 end

@@ -3,6 +3,7 @@ module Api
     class CoursesController < ApplicationController
       skip_before_action :authenticate_user!, only: [:index, :show]
       before_action :set_course, only: [:show, :update, :destroy]
+      before_action(only: [:create, :update, :destroy]) { require_role!(:ceo, :diretor, :equipe_pedagogica) }
 
       def index
         @courses = Course.order(:title)
@@ -37,8 +38,11 @@ module Api
       end
 
       def destroy
-        @course.destroy
-        head :no_content
+        if @course.destroy
+          head :no_content
+        else
+          render json: { errors: @course.errors.full_messages }, status: :unprocessable_entity
+        end
       end
 
       private

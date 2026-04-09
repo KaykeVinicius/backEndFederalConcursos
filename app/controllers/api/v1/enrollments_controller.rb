@@ -2,6 +2,7 @@ module Api
   module V1
     class EnrollmentsController < ApplicationController
       before_action :set_enrollment, only: [:show, :update]
+      before_action { require_role!(:ceo, :diretor, :assistente_comercial) }
 
       def index
         @enrollments = Enrollment.includes(:student, :course, :turma).order(created_at: :desc)
