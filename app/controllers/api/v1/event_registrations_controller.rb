@@ -11,8 +11,22 @@ module Api
 
       # POST /api/v1/events/:event_id/registrations
       def create
+        if @event.full?
+          return render json: { error: "Evento esgotado. Não há mais vagas disponíveis." }, status: :unprocessable_entity
+        end
+
         student = Student.find(params[:student_id])
-        registration = @event.event_registrations.build(student: student)
+
+        # Atribui o lote ativo (se o evento tiver lotes)
+        lote = @event.current_lote
+        if lote.nil? && @event.event_lotes.any?
+          return render json: { error: "Todos os lotes estão esgotados." }, status: :unprocessable_entity
+        end
+
+        registration = @event.event_registrations.build(
+          student: student,
+          event_lote_id: lote&.id
+        )
 
         if registration.save
           EventMailer.ticket(registration).deliver_later

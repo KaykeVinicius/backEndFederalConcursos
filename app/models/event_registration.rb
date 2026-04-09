@@ -1,6 +1,7 @@
 class EventRegistration < ApplicationRecord
   belongs_to :event
   belongs_to :student
+  belongs_to :event_lote, optional: true
 
   before_create :generate_ticket_token
 

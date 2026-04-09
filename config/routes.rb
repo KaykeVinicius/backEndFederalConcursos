@@ -22,6 +22,8 @@ Rails.application.routes.draw do
       resources :events do
         resources :registrations, only: [:index, :create, :destroy],
                   controller: "event_registrations"
+        resources :lotes, only: [:index, :create, :update, :destroy],
+                  controller: "event_lotes"
       end
       patch "event_registrations/checkin", to: "event_registrations#checkin"
       patch "event_registrations/:id/undo_checkin", to: "event_registrations#undo_checkin"
@@ -42,8 +44,9 @@ Rails.application.routes.draw do
       # Aluno namespace
       namespace :aluno do
         get "dashboard", to: "dashboard#index"
-        resources :questions,          only: [:index, :create]
-        resources :lesson_completions, only: [:index, :create, :destroy]
+        resources :questions,           only: [:index, :create]
+        resources :lesson_completions,  only: [:index, :create, :destroy]
+        resources :event_registrations, only: [:index]
         resources :lesson_pdfs,        only: [] do
           member { get :download }
         end

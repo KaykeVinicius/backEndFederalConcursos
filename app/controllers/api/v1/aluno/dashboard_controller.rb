@@ -11,9 +11,7 @@ module Api
           enrollments     = student.enrollments.includes(:course, :turma).where(status: :active)
           completed_count = student.lesson_completions.count
           pending_questions = student.questions.where(status: :pending).count
-          upcoming_events = Event.where(status: :agendado)
-                                 .where(course_id: enrollments.pluck(:course_id))
-                                 .order(:date).limit(5)
+          upcoming_events = Event.where(status: :agendado).order(:date).limit(5)
 
           render json: {
             student:            StudentSerializer.new(student).as_json,
