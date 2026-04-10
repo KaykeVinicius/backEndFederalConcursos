@@ -13,7 +13,7 @@ module Api
           subject = topic.subject
           course  = subject.course
 
-          student = @current_user.student
+          student = current_user.student
           unless student
             render json: { error: "Aluno não encontrado" }, status: :forbidden and return
           end
@@ -40,8 +40,6 @@ module Api
           # Senha = CPF do aluno sem pontuação (ex: 11122233444)
           password = student.cpf.gsub(/\D/, "")
 
-          # Aplica criptografia com HexaPDF
-          # Tenta abrir o PDF — se já estiver protegido, tenta com senha em branco
           protected_pdf = Tempfile.new(["pdf_protected", ".pdf"], binmode: true)
 
           open_opts = { decryption_opts: { password: "" } }

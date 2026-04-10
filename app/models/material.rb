@@ -5,5 +5,7 @@ class Material < ApplicationRecord
   belongs_to :subject,   optional: true
   belongs_to :turma,     optional: true
 
+  has_one_attached :file
+
   validates :title, presence: true
 end

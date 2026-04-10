@@ -15,6 +15,14 @@ class Course < ApplicationRecord
 
   before_destroy :check_no_active_enrollments
 
+  def price
+    price_cents.to_f / 100
+  end
+
+  def price=(val)
+    self.price_cents = (val.to_f * 100).round
+  end
+
   private
 
   def check_no_active_enrollments
@@ -22,13 +30,5 @@ class Course < ApplicationRecord
       errors.add(:base, "Não é possível excluir um curso com alunos matriculados ativos.")
       throw :abort
     end
-  end
-
-  def price
-    price_cents.to_f / 100
-  end
-
-  def price=(val)
-    self.price_cents = (val.to_f * 100).round
   end
 end

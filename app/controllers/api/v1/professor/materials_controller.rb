@@ -17,7 +17,10 @@ module Api
         end
 
         def create
-          @material = Material.new(material_params.merge(professor_id: current_user.id))
+          file = params[:file]
+          mp   = material_params.except(:file)
+          @material = Material.new(mp.merge(professor_id: current_user.id))
+          @material.file.attach(file) if file.present?
           if @material.save
             render json: @material, serializer: MaterialSerializer, status: :created
           else
@@ -40,7 +43,7 @@ module Api
 
         def material_params
           params.permit(:title, :material_type, :subject_id, :turma_id,
-                        :file_name, :file_url, :file_size)
+                        :file_name, :file_url, :file_size, :file)
         end
       end
     end

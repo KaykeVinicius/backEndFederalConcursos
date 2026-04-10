@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_04_10_110001) do
+ActiveRecord::Schema[8.0].define(version: 2026_04_10_140001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -93,7 +93,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_10_110001) do
   create_table "enrollments", force: :cascade do |t|
     t.bigint "student_id", null: false
     t.bigint "course_id", null: false
-    t.bigint "turma_id", null: false
+    t.bigint "turma_id"
     t.bigint "career_id"
     t.integer "status", default: 0, null: false
     t.date "started_at", null: false
@@ -304,6 +304,19 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_10_110001) do
     t.index ["subject_id"], name: "index_topics_on_subject_id"
   end
 
+  create_table "turma_class_days", force: :cascade do |t|
+    t.bigint "turma_id", null: false
+    t.bigint "subject_id", null: false
+    t.date "date", null: false
+    t.string "title"
+    t.text "description"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["subject_id"], name: "index_turma_class_days_on_subject_id"
+    t.index ["turma_id", "date"], name: "index_turma_class_days_on_turma_id_and_date"
+    t.index ["turma_id"], name: "index_turma_class_days_on_turma_id"
+  end
+
   create_table "turmas", force: :cascade do |t|
     t.bigint "course_id", null: false
     t.bigint "professor_id"
@@ -385,6 +398,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_10_110001) do
   add_foreign_key "subjects", "courses"
   add_foreign_key "subjects", "users", column: "professor_id"
   add_foreign_key "topics", "subjects"
+  add_foreign_key "turma_class_days", "subjects"
+  add_foreign_key "turma_class_days", "turmas"
   add_foreign_key "turmas", "courses"
   add_foreign_key "turmas", "users", column: "professor_id"
   add_foreign_key "users", "user_types"

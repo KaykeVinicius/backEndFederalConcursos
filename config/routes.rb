@@ -20,11 +20,14 @@ Rails.application.routes.draw do
       resources :students
       resources :careers
       resources :courses do
-        resources :subjects, shallow: true
+        resources :subjects, only: [:index, :create, :destroy]
         resources :turmas,   shallow: true
       end
-      resources :subjects, only: [:index, :create]
-      resources :turmas
+      resources :subjects, only: [:index, :create, :show, :update, :destroy]
+      resources :turmas do
+        resources :class_days, only: [:index, :create, :update, :destroy],
+                  controller: "turma_class_days"
+      end
       resources :enrollments
       resources :contracts, only: [:index, :show, :create, :update]
       resources :events do
@@ -61,6 +64,8 @@ Rails.application.routes.draw do
         resources :lesson_completions,  only: [:index, :create, :destroy]
         resources :event_registrations, only: [:index]
         resources :event_materials,     only: [:index]
+        resources :lessons,             only: [:index]
+        resources :materials,           only: [:index]
         resources :lesson_pdfs,        only: [] do
           member { get :download }
         end

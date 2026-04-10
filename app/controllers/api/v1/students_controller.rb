@@ -16,11 +16,26 @@ module Api
       def create
         @student = Student.new(student_params)
         resolve_city(@student)
-        if @student.save
-          render json: @student, serializer: StudentSerializer, status: :created
-        else
-          render json: { errors: @student.errors.full_messages }, status: :unprocessable_entity
+
+        ActiveRecord::Base.transaction do
+          @student.save!
+
+          # Cria o usuário aluno automaticamente se ainda não existir
+          unless User.exists?(email: @student.email)
+            user = User.create!(
+              name:     @student.name,
+              email:    @student.email,
+              cpf:      @student.cpf,
+              password: @student.cpf, # senha inicial = CPF
+              role:     :aluno
+            )
+            @student.update_column(:user_id, user.id)
+          end
         end
+
+        render json: @student, serializer: StudentSerializer, status: :created
+      rescue ActiveRecord::RecordInvalid => e
+        render json: { errors: e.record.errors.full_messages }, status: :unprocessable_entity
       end
 
       def update

@@ -1,9 +1,12 @@
 module Api
   module V1
     class SubjectsController < ApplicationController
+      skip_before_action :authenticate_user!, only: [:index, :show]
       before_action :set_subject, only: [:show, :update, :destroy]
       before_action(only: [:create, :update, :destroy]) { require_role!(:ceo, :diretor, :equipe_pedagogica) }
 
+      # GET /subjects                    → todas (templates sem course_id)
+      # GET /courses/:course_id/subjects → matérias do curso
       def index
         @subjects = if params[:course_id]
           Subject.where(course_id: params[:course_id]).includes(:professor).ordered
@@ -17,8 +20,21 @@ module Api
         render json: @subject, serializer: SubjectSerializer
       end
 
+      # POST /courses/:course_id/subjects → cria matéria para o curso (com nome do template)
+      # POST /subjects                    → cria template global (sem course_id)
       def create
-        @subject = Subject.new(subject_params)
+        if params[:course_id]
+          @subject = Subject.new(
+            course_id:    params[:course_id],
+            name:         params[:name],
+            description:  params[:description],
+            professor_id: params[:professor_id],
+            position:     Subject.where(course_id: params[:course_id]).count + 1
+          )
+        else
+          @subject = Subject.new(subject_params)
+        end
+
         if @subject.save
           render json: @subject, serializer: SubjectSerializer, status: :created
         else
