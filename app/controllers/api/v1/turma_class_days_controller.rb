@@ -46,7 +46,7 @@ module Api
       end
 
       def class_day_params
-        params.permit(:subject_id, :date, :title, :description)
+        params.permit(:subject_id, :professor_id, :date, :start_time, :end_time, :title, :description)
       end
     end
   end

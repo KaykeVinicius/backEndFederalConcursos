@@ -10,7 +10,8 @@ module Api
 
         if user&.authenticate(params[:password])
           record_access_log(user, ua, success: true)
-          token = JsonWebToken.encode(user_id: user.id, role: user.role)
+          session_token = user.rotate_session_token!
+          token = JsonWebToken.encode(user_id: user.id, role: user.role, session_token: session_token)
           render json: {
             token: token,
             user: UserSerializer.new(user).as_json
@@ -24,6 +25,12 @@ module Api
       # GET /api/v1/auth/me
       def me
         render json: UserSerializer.new(current_user).as_json
+      end
+
+      # DELETE /api/v1/auth/logout
+      def logout
+        current_user.update_column(:session_token, nil)
+        head :no_content
       end
 
       private

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_04_13_000002) do
+ActiveRecord::Schema[8.0].define(version: 2026_04_14_000010) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -54,6 +54,24 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_13_000002) do
     t.bigint "blob_id", null: false
     t.string "variation_digest", null: false
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
+  end
+
+  create_table "announcements", force: :cascade do |t|
+    t.string "title", null: false
+    t.text "body", null: false
+    t.integer "category", default: 0, null: false
+    t.integer "audience", default: 0, null: false
+    t.boolean "pinned", default: false, null: false
+    t.boolean "active", default: true, null: false
+    t.datetime "expires_at"
+    t.bigint "author_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["active"], name: "index_announcements_on_active"
+    t.index ["audience"], name: "index_announcements_on_audience"
+    t.index ["author_id"], name: "index_announcements_on_author_id"
+    t.index ["category"], name: "index_announcements_on_category"
+    t.index ["pinned"], name: "index_announcements_on_pinned"
   end
 
   create_table "careers", force: :cascade do |t|
@@ -236,6 +254,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_13_000002) do
     t.string "file_size"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.text "notes"
     t.index ["professor_id"], name: "index_materials_on_professor_id"
     t.index ["subject_id"], name: "index_materials_on_subject_id"
     t.index ["turma_id"], name: "index_materials_on_turma_id"
@@ -326,6 +345,10 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_13_000002) do
     t.text "description"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "professor_id"
+    t.time "start_time"
+    t.time "end_time"
+    t.index ["professor_id"], name: "index_turma_class_days_on_professor_id"
     t.index ["subject_id"], name: "index_turma_class_days_on_subject_id"
     t.index ["turma_id", "date"], name: "index_turma_class_days_on_turma_id_and_date"
     t.index ["turma_id"], name: "index_turma_class_days_on_turma_id"
@@ -372,8 +395,10 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_13_000002) do
     t.bigint "user_type_id"
     t.string "setup_password_token"
     t.datetime "setup_password_token_expires_at"
+    t.string "session_token"
     t.index ["cpf"], name: "index_users_on_cpf", unique: true
     t.index ["email"], name: "index_users_on_email", unique: true
+    t.index ["session_token"], name: "index_users_on_session_token"
     t.index ["setup_password_token"], name: "index_users_on_setup_password_token", unique: true, where: "(setup_password_token IS NOT NULL)"
     t.index ["user_type_id"], name: "index_users_on_user_type_id"
   end
@@ -381,6 +406,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_13_000002) do
   add_foreign_key "access_logs", "users"
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "announcements", "users", column: "author_id"
   add_foreign_key "contracts", "courses"
   add_foreign_key "contracts", "enrollments"
   add_foreign_key "contracts", "students"
@@ -418,6 +444,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_13_000002) do
   add_foreign_key "topics", "subjects"
   add_foreign_key "turma_class_days", "subjects"
   add_foreign_key "turma_class_days", "turmas"
+  add_foreign_key "turma_class_days", "users", column: "professor_id"
   add_foreign_key "turmas", "courses"
   add_foreign_key "turmas", "users", column: "professor_id"
   add_foreign_key "users", "user_types"

@@ -16,7 +16,14 @@ class ApplicationController < ActionController::API
       @current_user = User.find(payload[:user_id])
 
       unless @current_user.active?
-        render json: { error: "Usuário inativo" }, status: :unauthorized
+        render json: { error: "Usuário inativo" }, status: :unauthorized and return
+      end
+
+      # Bloqueio de sessão simultânea: verifica se o session_token do JWT ainda é válido
+      # Usuários antigos (sem session_token no JWT) ainda são aceitos durante a transição
+      if payload[:session_token].present? &&
+         @current_user.session_token != payload[:session_token]
+        render json: { error: "Sessão encerrada. Faça login novamente." }, status: :unauthorized
       end
     rescue JWT::ExpiredSignature
       render json: { error: "Token expirado" }, status: :unauthorized

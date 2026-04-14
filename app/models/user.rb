@@ -35,6 +35,13 @@ class User < ApplicationRecord
     role == "aluno"
   end
 
+  # Gera um novo session_token — invalida todas as sessões anteriores
+  def rotate_session_token!
+    self.session_token = SecureRandom.hex(32)
+    save!(validate: false)
+    session_token
+  end
+
   # Gera token de configuração de senha (válido por 7 dias)
   def generate_setup_token!
     self.setup_password_token            = SecureRandom.urlsafe_base64(32)

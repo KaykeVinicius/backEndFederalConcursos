@@ -43,7 +43,7 @@ module Api
 
         def material_params
           params.permit(:title, :material_type, :subject_id, :turma_id,
-                        :file_name, :file_url, :file_size, :file)
+                        :file_name, :file_url, :file_size, :file, :notes)
         end
       end
     end

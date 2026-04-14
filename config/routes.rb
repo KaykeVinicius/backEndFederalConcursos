@@ -6,6 +6,7 @@ Rails.application.routes.draw do
       # Auth
       post   "auth/login",                    to: "auth#login"
       get    "auth/me",                       to: "auth#me"
+      delete "auth/logout",                   to: "auth#logout"
       get    "auth/setup_password/validate",  to: "password_setups#validate"
       post   "auth/setup_password",           to: "password_setups#setup"
 
@@ -15,7 +16,9 @@ Rails.application.routes.draw do
         member     { patch :mark_read }
       end
 
-      resources :access_logs, only: [:index]
+      resources :access_logs,   only: [:index]
+      resources :announcements, only: [:index, :show, :create, :update, :destroy]
+      get "agenda", to: "agenda#index"
 
       # Admin / Pedagógica
       resources :users
