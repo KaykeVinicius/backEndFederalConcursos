@@ -35,6 +35,28 @@ class User < ApplicationRecord
     role == "aluno"
   end
 
+  # Gera token de configuração de senha (válido por 7 dias)
+  def generate_setup_token!
+    self.setup_password_token            = SecureRandom.urlsafe_base64(32)
+    self.setup_password_token_expires_at = 7.days.from_now
+    save!(validate: false)
+    setup_password_token
+  end
+
+  def setup_token_valid?(token)
+    setup_password_token.present? &&
+      setup_password_token == token &&
+      setup_password_token_expires_at > Time.current
+  end
+
+  def self.ransackable_attributes(auth_object = nil)
+    %w[name email cpf role active created_at]
+  end
+
+  def self.ransackable_associations(auth_object = nil)
+    %w[user_type student]
+  end
+
   private
 
   def sync_role_from_user_type

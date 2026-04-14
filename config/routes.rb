@@ -4,14 +4,18 @@ Rails.application.routes.draw do
   namespace :api do
     namespace :v1 do
       # Auth
-      post   "auth/login", to: "auth#login"
-      get    "auth/me",    to: "auth#me"
+      post   "auth/login",                    to: "auth#login"
+      get    "auth/me",                       to: "auth#me"
+      get    "auth/setup_password/validate",  to: "password_setups#validate"
+      post   "auth/setup_password",           to: "password_setups#setup"
 
       # Notificações
       resources :notifications, only: [:index] do
         collection { patch :mark_all_read }
         member     { patch :mark_read }
       end
+
+      resources :access_logs, only: [:index]
 
       # Admin / Pedagógica
       resources :users

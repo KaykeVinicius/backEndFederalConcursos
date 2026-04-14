@@ -22,4 +22,12 @@ class Event < ApplicationRecord
   validates :date,       presence: true
   validates :start_time, presence: true
   validates :end_time,   presence: true
+
+  def self.ransackable_attributes(auth_object = nil)
+    %w[title description event_type status date location is_free created_at]
+  end
+
+  def self.ransackable_associations(auth_object = nil)
+    %w[course subjects]
+  end
 end

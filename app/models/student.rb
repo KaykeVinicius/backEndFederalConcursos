@@ -18,4 +18,12 @@ class Student < ApplicationRecord
   def enrolled_count_for_course(course_id)
     enrollments.where(course_id: course_id, status: :active).count
   end
+
+  def self.ransackable_attributes(auth_object = nil)
+    %w[name email cpf whatsapp active situacao street neighborhood cep created_at]
+  end
+
+  def self.ransackable_associations(auth_object = nil)
+    %w[user city enrollments courses]
+  end
 end

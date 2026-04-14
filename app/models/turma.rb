@@ -23,6 +23,14 @@ class Turma < ApplicationRecord
     update_column(:status, :fechada) if enrolled_count >= max_students && status != "fechada"
   end
 
+  def self.ransackable_attributes(auth_object = nil)
+    %w[name status modalidade shift start_date end_date created_at]
+  end
+
+  def self.ransackable_associations(auth_object = nil)
+    %w[course professor]
+  end
+
   private
 
   def course_must_not_be_online

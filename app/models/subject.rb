@@ -9,4 +9,12 @@ class Subject < ApplicationRecord
   validates :name, presence: true
 
   scope :ordered, -> { order(:position, :name) }
+
+  def self.ransackable_attributes(auth_object = nil)
+    %w[name created_at]
+  end
+
+  def self.ransackable_associations(auth_object = nil)
+    %w[course professor]
+  end
 end

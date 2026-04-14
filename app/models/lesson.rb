@@ -6,9 +6,8 @@ class Lesson < ApplicationRecord
   has_many :questions, dependent: :destroy
 
   # youtube_id stores ONLY the embed ID — NEVER the original URL
-  validates :title,      presence: true
-  validates :youtube_id, presence: true
-  validates :position,   presence: true
+  validates :title,    presence: true
+  validates :position, presence: true
 
   scope :ordered,    -> { order(:position) }
   scope :available,  -> { where(available: true) }

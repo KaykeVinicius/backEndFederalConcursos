@@ -22,6 +22,14 @@ class Enrollment < ApplicationRecord
     self.total_paid_cents = (val.to_f * 100).round
   end
 
+  def self.ransackable_attributes(auth_object = nil)
+    %w[status enrollment_type payment_method started_at expires_at created_at]
+  end
+
+  def self.ransackable_associations(auth_object = nil)
+    %w[student course turma career]
+  end
+
   private
 
   def check_turma_capacity

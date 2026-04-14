@@ -8,11 +8,10 @@ module Api
       # GET /subjects                    → todas (templates sem course_id)
       # GET /courses/:course_id/subjects → matérias do curso
       def index
-        @subjects = if params[:course_id]
-          Subject.where(course_id: params[:course_id]).includes(:professor).ordered
-        else
-          Subject.includes(:professor).ordered
-        end
+        base = params[:course_id] ? Subject.where(course_id: params[:course_id]) : Subject.all
+        q = base.includes(:professor).ransack(params[:q])
+        q.sorts = "position asc, name asc" if q.sorts.empty?
+        @subjects = q.result(distinct: true)
         render json: @subjects, each_serializer: SubjectSerializer
       end
 

@@ -5,11 +5,10 @@ module Api
       before_action(only: [:create, :update, :destroy]) { require_role!(:ceo, :diretor, :equipe_pedagogica) }
 
       def index
-        @turmas = if params[:course_id]
-          Turma.where(course_id: params[:course_id]).includes(:course, :professor)
-        else
-          Turma.includes(:course, :professor)
-        end
+        base = params[:course_id] ? Turma.where(course_id: params[:course_id]) : Turma.all
+        q = base.includes(:course, :professor).ransack(params[:q])
+        q.sorts = "name asc" if q.sorts.empty?
+        @turmas = q.result(distinct: true)
         render json: @turmas, each_serializer: TurmaSerializer
       end
 

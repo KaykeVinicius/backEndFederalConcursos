@@ -23,6 +23,14 @@ class Course < ApplicationRecord
     self.price_cents = (val.to_f * 100).round
   end
 
+  def self.ransackable_attributes(auth_object = nil)
+    %w[title description status access_type start_date end_date created_at]
+  end
+
+  def self.ransackable_associations(auth_object = nil)
+    %w[career subjects turmas enrollments]
+  end
+
   private
 
   def check_no_active_enrollments

@@ -5,7 +5,9 @@ module Api
       before_action :set_user, only: [:show, :update, :destroy]
 
       def index
-        @users = User.order(:name)
+        q = User.ransack(params[:q])
+        q.sorts = "name asc" if q.sorts.empty?
+        @users = q.result(distinct: true)
         render json: @users, each_serializer: UserSerializer
       end
 

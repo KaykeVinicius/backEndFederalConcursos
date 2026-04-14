@@ -4,8 +4,10 @@ module Api
       before_action :set_event, only: [:show, :update, :destroy]
 
       def index
-        @events = Event.order(:date)
-        @events = @events.where(course_id: params[:course_id]) if params[:course_id]
+        scope = params[:course_id] ? Event.where(course_id: params[:course_id]) : Event.all
+        q = scope.ransack(params[:q])
+        q.sorts = "date asc" if q.sorts.empty?
+        @events = q.result(distinct: true)
         render json: @events, each_serializer: EventSerializer
       end
 

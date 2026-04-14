@@ -10,9 +10,23 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_04_10_140001) do
+ActiveRecord::Schema[8.0].define(version: 2026_04_13_000002) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "access_logs", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.string "ip_address"
+    t.string "user_agent"
+    t.string "device"
+    t.string "browser"
+    t.string "action", default: "login", null: false
+    t.boolean "success", default: true, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["created_at"], name: "index_access_logs_on_created_at"
+    t.index ["user_id"], name: "index_access_logs_on_user_id"
+  end
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -203,7 +217,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_10_140001) do
     t.bigint "topic_id", null: false
     t.string "title", null: false
     t.string "duration"
-    t.string "youtube_id", null: false
+    t.string "youtube_id"
     t.integer "position", default: 0, null: false
     t.boolean "available", default: true, null: false
     t.datetime "created_at", null: false
@@ -356,11 +370,15 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_10_140001) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.bigint "user_type_id"
+    t.string "setup_password_token"
+    t.datetime "setup_password_token_expires_at"
     t.index ["cpf"], name: "index_users_on_cpf", unique: true
     t.index ["email"], name: "index_users_on_email", unique: true
+    t.index ["setup_password_token"], name: "index_users_on_setup_password_token", unique: true, where: "(setup_password_token IS NOT NULL)"
     t.index ["user_type_id"], name: "index_users_on_user_type_id"
   end
 
+  add_foreign_key "access_logs", "users"
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "contracts", "courses"

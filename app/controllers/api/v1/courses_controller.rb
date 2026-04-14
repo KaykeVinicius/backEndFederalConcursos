@@ -6,7 +6,9 @@ module Api
       before_action(only: [:create, :update, :destroy]) { require_role!(:ceo, :diretor, :equipe_pedagogica) }
 
       def index
-        @courses = Course.order(:title)
+        q = Course.ransack(params[:q])
+        q.sorts = "title asc" if q.sorts.empty?
+        @courses = q.result(distinct: true)
         render json: @courses, each_serializer: CourseSerializer
       end
 

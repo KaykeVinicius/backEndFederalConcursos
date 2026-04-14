@@ -5,7 +5,9 @@ module Api
       before_action :set_student, only: [:show, :update, :destroy]
 
       def index
-        @students = Student.includes(:user, :city).order(:name)
+        q = Student.includes(:user, :city).ransack(params[:q])
+        q.sorts = "name asc" if q.sorts.empty?
+        @students = q.result(distinct: true)
         render json: @students, each_serializer: StudentSerializer
       end
 

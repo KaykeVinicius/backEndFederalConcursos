@@ -52,21 +52,21 @@ puts "Criando cursos..."
 course1 = Course.create!(
   title: "Reta Final - Assembleia Legislativa de Rondonia",
   description: "Curso de Reta Final em Resolucao de Questoes para o Concurso da Assembleia Legislativa de Rondonia, modalidade presencial, materias especificas.",
-  price_cents: 45300, status: :published, access_type: :ambos,
+  price_cents: 45300, status: :published, access_type: :hibrido,
   duration_in_days: 33, start_date: "2026-03-01", end_date: "2026-04-03"
 )
 
 course2 = Course.create!(
   title: "Preparatorio OAB - 1a Fase",
   description: "Curso completo de preparacao para a primeira fase do Exame da OAB.",
-  price_cents: 89000, status: :published, access_type: :ambos,
+  price_cents: 89000, status: :published, access_type: :hibrido,
   duration_in_days: 90, start_date: "2026-02-01", end_date: "2026-05-01"
 )
 
 course3 = Course.create!(
   title: "CFC - Conselho Federal de Contabilidade",
   description: "Preparatorio completo para o exame do CFC.",
-  price_cents: 65000, status: :published, access_type: :interno,
+  price_cents: 65000, status: :published, access_type: :online,
   duration_in_days: 60, start_date: "2026-04-01", end_date: "2026-06-01"
 )
 
@@ -147,13 +147,13 @@ puts "Criando matrículas..."
 enrollment1 = Enrollment.create!(
   student: student1, course: course1, turma: turma1, career: career_concursos,
   status: :active, started_at: "2026-01-05", expires_at: "2026-04-03",
-  enrollment_type: :interno, payment_method: "Cartao de Credito a vista",
+  enrollment_type: :online, payment_method: "Cartao de Credito a vista",
   total_paid_cents: 45300, contract_signed: true
 )
 enrollment2 = Enrollment.create!(
   student: student2, course: course2, turma: turma3, career: career_oab,
   status: :active, started_at: "2026-02-10", expires_at: "2026-05-10",
-  enrollment_type: :externo, payment_method: "PIX",
+  enrollment_type: :online, payment_method: "PIX",
   total_paid_cents: 89000, contract_signed: false
 )
 
