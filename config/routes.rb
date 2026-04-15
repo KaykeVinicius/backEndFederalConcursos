@@ -81,6 +81,9 @@ Rails.application.routes.draw do
         resources :lesson_pdfs,        only: [] do
           member { get :download }
         end
+        resources :lessons, only: [] do
+          member { get :video_token, controller: "video_tokens" }
+        end
       end
     end
   end

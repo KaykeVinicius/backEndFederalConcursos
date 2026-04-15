@@ -55,7 +55,7 @@ module Api
 
       def course_params
         params.permit(:title, :description, :price, :status, :access_type,
-                      :duration_in_days, :start_date, :end_date, :career_id)
+                      :duration_in_days, :start_date, :end_date, :career_id, :online_url)
       end
     end
   end

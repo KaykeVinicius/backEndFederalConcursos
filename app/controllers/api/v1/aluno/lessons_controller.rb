@@ -29,13 +29,14 @@ module Api
 
           render json: lessons.map { |l|
             {
-              id:          l.id,
-              title:       l.title,
-              duration:    l.duration,
-              position:    l.position,
-              available:   l.available,
-              topic_id:    l.topic_id,
-              youtube_id:  can_watch_video ? l.youtube_id : nil,
+              id:             l.id,
+              title:          l.title,
+              duration:       l.duration,
+              position:       l.position,
+              available:      l.available,
+              topic_id:       l.topic_id,
+              has_video:      can_watch_video && l.youtube_id.present?,
+              # youtube_id NÃO é retornado aqui — buscado individualmente via /video_token
               lesson_pdfs: l.lesson_pdfs.map { |p|
                 url = p.file.attached? \
                   ? Rails.application.routes.url_helpers.rails_blob_url(p.file, host: "http://localhost:3001") \
