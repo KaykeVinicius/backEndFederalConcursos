@@ -5,6 +5,8 @@ Rails.application.routes.draw do
     namespace :v1 do
       # Auth
       post   "auth/login",                    to: "auth#login"
+      post   "auth/forgot_password",          to: "auth#forgot_password"
+      get    "dashboard",                      to: "dashboard#index"
       get    "auth/me",                       to: "auth#me"
       delete "auth/logout",                   to: "auth#logout"
       get    "auth/setup_password/validate",  to: "password_setups#validate"
@@ -56,8 +58,11 @@ Rails.application.routes.draw do
       # Professor namespace
       namespace :professor do
         get "dashboard", to: "dashboard#index"
-        resources :turmas,          only: [:index, :show]
+        resources :turmas, only: [:index, :show] do
+          member { get :students }
+        end
         resources :materials
+        resources :subjects, only: [:index]
         resources :event_materials, only: [:index, :create, :destroy]
         resources :questions, only: [:index, :show, :update] do
           member { patch :answer }

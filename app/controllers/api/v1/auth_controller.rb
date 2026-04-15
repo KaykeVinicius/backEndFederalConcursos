@@ -1,7 +1,7 @@
 module Api
   module V1
     class AuthController < ApplicationController
-      skip_before_action :authenticate_user!, only: [:login]
+      skip_before_action :authenticate_user!, only: [:login, :forgot_password]
 
       # POST /api/v1/auth/login
       def login
@@ -25,6 +25,22 @@ module Api
       # GET /api/v1/auth/me
       def me
         render json: UserSerializer.new(current_user).as_json
+      end
+
+      # POST /api/v1/auth/forgot_password
+      def forgot_password
+        cpf  = params[:cpf].to_s.gsub(/\D/, "")   # remove pontos e traço
+        user = User.find_by(cpf: cpf)
+
+        if user
+          token     = user.generate_reset_token!
+          frontend  = ENV.fetch("FRONTEND_URL", "http://localhost:3000")
+          reset_url = "#{frontend}/reset-password?token=#{token}"
+          UserMailer.reset_password_email(user, reset_url).deliver_now
+        end
+
+        # Sempre retorna sucesso — não revela se o CPF existe ou não
+        render json: { message: "Se este CPF estiver cadastrado, o link de redefinição será enviado para o e-mail vinculado." }
       end
 
       # DELETE /api/v1/auth/logout

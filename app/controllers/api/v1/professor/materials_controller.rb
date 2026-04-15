@@ -7,8 +7,8 @@ module Api
 
         def index
           @materials = Material.where(professor_id: current_user.id)
-                               .includes(:subject, :turma)
-                               .order(created_at: :desc)
+                               .includes({ turma: :course }, { subject: :course })
+                               .order(created_at: :asc)
           render json: @materials, each_serializer: MaterialSerializer
         end
 
@@ -22,6 +22,7 @@ module Api
           @material = Material.new(mp.merge(professor_id: current_user.id))
           @material.file.attach(file) if file.present?
           if @material.save
+            @material = Material.includes({ turma: :course }, { subject: :course }).find(@material.id)
             render json: @material, serializer: MaterialSerializer, status: :created
           else
             render json: { errors: @material.errors.full_messages }, status: :unprocessable_entity

@@ -68,13 +68,17 @@ module Api
 
         case current_user.role
         when "professor"
-          # Class_days onde o professor da aula é o usuário atual,
-          # OU onde a turma tem o usuário como professor (e a aula não tem professor específico)
-          base.where(
+          # ?all=true → professor vê todas as aulas (visão geral da semana)
+          return base if params[:all] == "true"
+
+          # Padrão: apenas as aulas do próprio professor
+          # 3 formas de vínculo: diretamente na aula, via turma, ou via matéria
+          base.joins(:turma).left_joins(:subject).where(
             "(turma_class_days.professor_id = :uid) OR " \
-            "(turma_class_days.professor_id IS NULL AND turmas.professor_id = :uid)",
+            "(turma_class_days.professor_id IS NULL AND turmas.professor_id = :uid) OR " \
+            "(turma_class_days.professor_id IS NULL AND subjects.professor_id = :uid)",
             uid: current_user.id
-          ).joins(:turma)
+          )
 
         when "aluno"
           # Turmas em que o aluno tem matrícula ativa

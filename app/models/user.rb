@@ -42,10 +42,18 @@ class User < ApplicationRecord
     session_token
   end
 
-  # Gera token de configuração de senha (válido por 7 dias)
+  # Gera token de configuração de senha (válido por 7 dias — para novo usuário)
   def generate_setup_token!
     self.setup_password_token            = SecureRandom.urlsafe_base64(32)
     self.setup_password_token_expires_at = 7.days.from_now
+    save!(validate: false)
+    setup_password_token
+  end
+
+  # Gera token de redefinição de senha (válido por 2 horas — para esqueceu senha)
+  def generate_reset_token!
+    self.setup_password_token            = SecureRandom.urlsafe_base64(32)
+    self.setup_password_token_expires_at = 2.hours.from_now
     save!(validate: false)
     setup_password_token
   end

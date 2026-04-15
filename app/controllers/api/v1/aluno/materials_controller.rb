@@ -25,7 +25,7 @@ module Api
 
           materials = Material.where(subject_id: subject_ids)
                               .includes(:professor, :subject)
-                              .order(created_at: :desc)
+                              .order(created_at: :asc)
 
           # Se a matrícula tiver turma, filtra por turma (ou sem turma definida)
           if enrollment.turma_id

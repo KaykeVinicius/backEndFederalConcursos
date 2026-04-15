@@ -1,9 +1,18 @@
 class MaterialSerializer < ActiveModel::Serializer
   attributes :id, :title, :material_type, :file_name, :file_url, :file_size,
-             :professor_id, :subject_id, :turma_id, :notes, :created_at
+             :professor_id, :subject_id, :turma_id, :notes, :created_at,
+             :course_id, :course_title
 
   belongs_to :professor, serializer: UserSerializer
   belongs_to :subject,   serializer: SubjectSerializer
+
+  def course_id
+    object.turma&.course_id || object.subject&.course_id
+  end
+
+  def course_title
+    object.turma&.course&.title || object.subject&.course&.title
+  end
 
   def file_url
     if object.file.attached?
