@@ -3,6 +3,14 @@ Rails.application.routes.draw do
 
   namespace :api do
     namespace :v1 do
+      # Checkout público (landing page)
+      post "checkout",                       to: "checkout#create"
+      get  "checkout/student_lookup",        to: "checkout#student_lookup"
+      get  "checkout/check_availability",    to: "checkout#check_availability"
+
+      # Webhooks externos
+      post "webhooks/nupay", to: "webhooks#nupay"
+
       # Auth
       post   "auth/login",                    to: "auth#login"
       post   "auth/forgot_password",          to: "auth#forgot_password"

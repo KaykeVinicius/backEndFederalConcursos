@@ -1,0 +1,37 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: federal-concursos-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: federal123
+      POSTGRES_DB: federal_cursos
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      args:
+        RAILS_ENV: development
+    image: federal-concursos-api
+    container_name: federal-concursos-api
+    env_file: .env
+    environment:
+      RAILS_ENV: development
+      DB_HOST: db
+    ports:
+      - "3001:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
