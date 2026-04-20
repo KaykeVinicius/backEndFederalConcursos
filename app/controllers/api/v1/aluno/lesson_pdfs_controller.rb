@@ -2,59 +2,39 @@ module Api
   module V1
     module Aluno
       class LessonPdfsController < ApplicationController
+        include PdfProtector
         before_action :require_aluno!
 
         def download
           @lesson_pdf = LessonPdf.find(params[:id])
 
-          # Verifica se o aluno tem matrícula ativa no curso que contém essa aula
           lesson  = @lesson_pdf.lesson
           topic   = lesson.topic
           subject = topic.subject
           course  = subject.course
 
-          student = current_user.student
-          unless student
-            render json: { error: "Aluno não encontrado" }, status: :forbidden and return
+          if current_student_ids.empty?
+            return render json: { error: "Aluno não encontrado" }, status: :forbidden
           end
 
-          enrolled = Enrollment.exists?(
-            student_id: student.id,
-            course_id:  course.id,
-            status:     "active"
-          )
-
-          unless enrolled
-            render json: { error: "Sem matrícula ativa neste curso" }, status: :forbidden and return
+          unless Enrollment.exists?(student_id: current_student_ids, course_id: course.id, status: "active")
+            return render json: { error: "Sem matrícula ativa neste curso" }, status: :forbidden
           end
 
           unless @lesson_pdf.file.attached?
-            render json: { error: "Arquivo não disponível" }, status: :not_found and return
+            return render json: { error: "Arquivo não disponível" }, status: :not_found
           end
 
-          # Baixa o arquivo do Active Storage para um tempfile
           original = Tempfile.new(["pdf_original", ".pdf"], binmode: true)
           original.write(@lesson_pdf.file.download)
           original.rewind
 
-          # Senha = CPF do aluno sem pontuação (ex: 11122233444)
-          password = student.cpf.gsub(/\D/, "")
+          protected_pdf = build_protected_pdf(
+            original_path: original.path,
+            student_name:  current_user.name,
+            student_cpf:   current_student.cpf
+          )
 
-          protected_pdf = Tempfile.new(["pdf_protected", ".pdf"], binmode: true)
-
-          open_opts = { decryption_opts: { password: "" } }
-          HexaPDF::Document.open(original.path, **open_opts) do |doc|
-            doc.encrypt(
-              owner_password: SecureRandom.hex(16),
-              user_password:  password,
-              permissions:    [:print, :copy_content],
-              algorithm:      :arc4,
-              key_length:     128
-            )
-            doc.write(protected_pdf.path, optimize: true)
-          end
-
-          protected_pdf.rewind
           filename = @lesson_pdf.name.end_with?(".pdf") ? @lesson_pdf.name : "#{@lesson_pdf.name}.pdf"
 
           send_data protected_pdf.read,

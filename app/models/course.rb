@@ -4,6 +4,8 @@ class Course < ApplicationRecord
 
   belongs_to :career, optional: true
 
+  has_one_attached :cover_image
+
   has_many :subjects
   has_many :turmas
   has_many :enrollments
@@ -11,7 +13,7 @@ class Course < ApplicationRecord
   has_many :contracts
   has_many :events
 
-  validates :title, presence: true
+  validates :title, presence: true, uniqueness: { scope: :career_id, message: "já existe um curso com esse título nessa carreira" }
 
   before_destroy :check_no_active_enrollments
 

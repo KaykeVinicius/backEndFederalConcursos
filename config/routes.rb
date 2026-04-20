@@ -24,7 +24,7 @@ Rails.application.routes.draw do
 
       # Admin / Pedagógica
       resources :users
-      resources :user_types
+      resources :user_types, only: [:index]
       resources :cities, only: [:index]
       resources :students
       resources :careers
@@ -37,7 +37,11 @@ Rails.application.routes.draw do
         resources :class_days, only: [:index, :create, :update, :destroy],
                   controller: "turma_class_days"
       end
-      resources :enrollments
+      resources :enrollments do
+        member do
+          post :resend_email
+        end
+      end
       resources :contracts, only: [:index, :show, :create, :update]
       resources :events do
         resources :registrations, only: [:index, :create, :destroy],
@@ -77,7 +81,9 @@ Rails.application.routes.draw do
         resources :event_registrations, only: [:index]
         resources :event_materials,     only: [:index]
         resources :lessons,             only: [:index]
-        resources :materials,           only: [:index]
+        resources :materials,           only: [:index] do
+          member { get :download }
+        end
         resources :lesson_pdfs,        only: [] do
           member { get :download }
         end

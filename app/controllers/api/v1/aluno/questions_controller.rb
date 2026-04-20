@@ -5,14 +5,14 @@ module Api
         before_action :require_aluno!
 
         def index
-          student = current_user.student
-          @questions = student.questions.includes(:professor, :lesson, :subject)
-                              .order(created_at: :desc)
+          @questions = Question.where(student_id: current_student_ids)
+                               .includes(:professor, :lesson, :subject)
+                               .order(created_at: :desc)
           render json: @questions, each_serializer: QuestionSerializer
         end
 
         def create
-          student = current_user.student
+          student = current_student
           lesson  = Lesson.find(params[:lesson_id])
           subject = lesson.subject
 

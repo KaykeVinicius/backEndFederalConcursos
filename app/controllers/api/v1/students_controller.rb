@@ -51,6 +51,9 @@ module Api
       end
 
       def destroy
+        if @student.enrollments.exists?
+          return render json: { error: "Não é possível excluir este aluno pois ele possui matrículas vinculadas." }, status: :unprocessable_entity
+        end
         @student.update!(active: false)
         head :no_content
       end

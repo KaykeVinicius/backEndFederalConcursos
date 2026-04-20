@@ -5,13 +5,25 @@ module Api
         before_action :require_aluno!
 
         def index
-          student = current_user.student
-          return render json: { error: "Aluno não encontrado" }, status: :not_found unless student
+          # Busca todos os students vinculados ao usuário (pode haver mais de um)
+          students = Student.where(user_id: current_user.id)
+          return render json: { error: "Aluno não encontrado" }, status: :not_found if students.empty?
 
-          enrollments     = student.enrollments.includes(:course, :turma).where(status: :active)
-          completed_count = student.lesson_completions.count
-          pending_questions = student.questions.where(status: :pending).count
-          upcoming_events = Event.where(status: :agendado).order(:date).limit(5)
+          student_ids     = students.pluck(:id)
+          all_enrollments = Enrollment.includes(:course, :turma).where(student_id: student_ids, status: :active)
+
+          # Deduplica por course_id: quando o mesmo aluno tem múltiplas matrículas no mesmo
+          # curso (ex: dois registros de student para o mesmo usuário), exibe apenas uma,
+          # priorizando online > hibrido > presencial.
+          type_priority = { "online" => 0, "hibrido" => 1, "presencial" => 2 }
+          enrollments = all_enrollments
+            .sort_by { |e| type_priority[e.enrollment_type] || 99 }
+            .uniq(&:course_id)
+
+          completed_count   = LessonCompletion.where(student_id: student_ids).count
+          pending_questions = Question.where(student_id: student_ids, status: :pending).count
+          student           = students.first
+          upcoming_events   = Event.where(status: :agendado).order(:date).limit(5)
 
           render json: {
             student:            StudentSerializer.new(student).as_json,

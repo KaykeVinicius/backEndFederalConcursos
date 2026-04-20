@@ -10,12 +10,9 @@ module Api
           subject = topic.subject
           course  = subject.course
 
-          student = current_user.student
-          unless student
-            return render json: { error: "Aluno não encontrado" }, status: :forbidden
-          end
+          return render json: { error: "Aluno não encontrado" }, status: :forbidden if current_student_ids.empty?
 
-          enrollment = Enrollment.find_by(student_id: student.id, course_id: course.id, status: "active")
+          enrollment = Enrollment.find_by(student_id: current_student_ids, course_id: course.id, status: "active")
           unless enrollment
             return render json: { error: "Sem matrícula ativa neste curso" }, status: :forbidden
           end
@@ -39,7 +36,7 @@ module Api
               # youtube_id NÃO é retornado aqui — buscado individualmente via /video_token
               lesson_pdfs: l.lesson_pdfs.map { |p|
                 url = p.file.attached? \
-                  ? Rails.application.routes.url_helpers.rails_blob_url(p.file, host: "http://localhost:3001") \
+                  ? Rails.application.routes.url_helpers.rails_blob_url(p.file, host: Rails.env.development? ? ENV.fetch("RAILS_HOST_POC", "http://localhost:3003") : ENV.fetch("RAILS_HOST", "http://localhost:3001")) \
                   : p.file_url
                 { id: p.id, name: p.name, file_size: p.file_size, file_url: url }
               }

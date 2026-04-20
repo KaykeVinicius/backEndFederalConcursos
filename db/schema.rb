@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_04_15_000001) do
+ActiveRecord::Schema[8.0].define(version: 2026_04_18_195740) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -120,6 +120,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_15_000001) do
     t.datetime "updated_at", null: false
     t.bigint "career_id"
     t.string "online_url"
+    t.integer "workload_hours"
     t.index ["career_id"], name: "index_courses_on_career_id"
   end
 

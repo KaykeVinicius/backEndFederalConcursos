@@ -35,13 +35,20 @@ Rails.application.configure do
   # Make template changes take effect immediately.
   config.action_mailer.perform_caching = false
 
-  # Set localhost to be used by links generated in mailer templates.
-  config.action_mailer.default_url_options = { host: "localhost", port: 3000 }
+  # Set poc host to be used by links generated in mailer templates.
+  config.action_mailer.default_url_options = { host: "poc.federalcursos.com.br", protocol: "https" }
 
-  # Em desenvolvimento: Letter Opener abre o e-mail no navegador automaticamente.
-  # Em produção: trocar para :smtp e configurar SMTP_USER / SMTP_PASS no .env
-  config.action_mailer.delivery_method = :letter_opener
+  config.action_mailer.delivery_method = :smtp
   config.action_mailer.perform_deliveries = true
+  config.action_mailer.smtp_settings = {
+    address:        ENV.fetch("SMTP_HOST", "smtp.hostinger.com"),
+    port:           ENV.fetch("SMTP_PORT", 465).to_i,
+    domain:         "federalcursos.com.br",
+    user_name:      ENV["SMTP_USER"],
+    password:       ENV["SMTP_PASS"],
+    authentication: :login,
+    tls:            true
+  }
 
   # Print deprecation notices to the Rails logger.
   config.active_support.deprecation = :log

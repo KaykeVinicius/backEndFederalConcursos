@@ -1,7 +1,7 @@
 module Api
   module V1
     class EnrollmentsController < ApplicationController
-      before_action :set_enrollment, only: [:show, :update]
+      before_action :set_enrollment, only: [:show, :update, :resend_email]
       before_action { require_role!(:ceo, :diretor, :assistente_comercial) }
 
       def index
@@ -17,6 +17,18 @@ module Api
 
       def create
         @enrollment = Enrollment.new(enrollment_params)
+
+        # Bloqueia matrícula duplicada: mesmo usuário (via todos os student_ids) no mesmo curso
+        if @enrollment.student_id.present? && @enrollment.course_id.present?
+          student = Student.find_by(id: @enrollment.student_id)
+          if student
+            all_student_ids = Student.where(user_id: student.user_id).pluck(:id)
+            if Enrollment.where(student_id: all_student_ids, course_id: @enrollment.course_id, status: :active).exists?
+              return render json: { errors: ["Este aluno já possui uma matrícula ativa neste curso."] }, status: :unprocessable_entity
+            end
+          end
+        end
+
         if @enrollment.save
           contract = create_contract(@enrollment)
           send_enrollment_email(@enrollment, contract)
@@ -24,6 +36,13 @@ module Api
         else
           render json: { errors: @enrollment.errors.full_messages }, status: :unprocessable_entity
         end
+      end
+
+      def resend_email
+        send_enrollment_email(@enrollment)
+        render json: { message: "E-mail reenviado com sucesso." }
+      rescue => e
+        render json: { error: "Erro ao reenviar e-mail: #{e.message}" }, status: :unprocessable_entity
       end
 
       def update
@@ -60,7 +79,7 @@ module Api
         # Cria User para o aluno se ainda não existir
         user = student.user || User.find_by(email: student.email) || User.find_by(cpf: student.cpf)
         if user.nil?
-          aluno_type  = UserType.find_by(slug: "aluno")
+          aluno_type    = UserType.find_by(slug: "aluno")
           temp_password = SecureRandom.hex(16)
           user = User.new(
             name:                  student.name,
@@ -78,7 +97,11 @@ module Api
         # Vincula user ao student se ainda não estiver vinculado
         student.update_column(:user_id, user.id) if student.user_id.nil?
 
-        setup_token = user.generate_setup_token!
+        # Gera token de setup se o usuário nunca fez login (session_token nil)
+        # ou ainda não ativou a conta (active: false)
+        needs_setup = !user.active? || user.session_token.nil?
+        setup_token = needs_setup ? user.generate_setup_token! : nil
+
         EnrollmentMailer.confirmation(enrollment, setup_token: setup_token, contract: contract).deliver_now
       rescue => e
         Rails.logger.error "[EnrollmentsController] Erro ao enviar e-mail: #{e.message}"

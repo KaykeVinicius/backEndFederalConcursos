@@ -81,11 +81,11 @@ module Api
           )
 
         when "aluno"
-          # Turmas em que o aluno tem matrícula ativa
-          student = current_user.student
-          return TurmaClassDay.none unless student
+          # Turmas em que o aluno tem matrícula ativa (suporte a múltiplos student records)
+          student_ids = Student.where(user_id: current_user.id).pluck(:id)
+          return TurmaClassDay.none if student_ids.empty?
 
-          turma_ids = Enrollment.where(student_id: student.id, status: :active)
+          turma_ids = Enrollment.where(student_id: student_ids, status: :active)
                                 .where.not(turma_id: nil)
                                 .pluck(:turma_id)
           base.where(turma_id: turma_ids)

@@ -31,6 +31,9 @@ module Api
       end
 
       def destroy
+        if Course.exists?(career_id: @career.id)
+          return render json: { error: "Não é possível excluir esta carreira pois ela está vinculada a cursos." }, status: :unprocessable_entity
+        end
         @career.destroy
         head :no_content
       end

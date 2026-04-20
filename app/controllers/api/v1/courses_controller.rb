@@ -54,8 +54,11 @@ module Api
       end
 
       def course_params
-        params.permit(:title, :description, :price, :status, :access_type,
-                      :duration_in_days, :start_date, :end_date, :career_id, :online_url)
+        p = params.permit(:title, :description, :price, :status, :access_type,
+                          :duration_in_days, :start_date, :end_date, :career_id,
+                          :online_url, :workload_hours, :cover_image)
+        p[:cover_image] = params[:cover_image] if params[:cover_image].present?
+        p
       end
     end
   end

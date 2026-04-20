@@ -1,5 +1,5 @@
 class EventMailer < ApplicationMailer
-  default from: "Federal Concursos <noreply@federalconcursos.com.br>"
+  default from: "Federal Cursos <federall@federalcursos.com.br>"
 
   def ticket(registration)
     @registration = registration

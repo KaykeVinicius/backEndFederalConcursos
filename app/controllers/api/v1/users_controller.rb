@@ -33,6 +33,19 @@ module Api
       end
 
       def destroy
+        if @user.role == "professor"
+          if Subject.exists?(professor_id: @user.id)
+            return render json: { error: "Não é possível excluir este professor pois ele está vinculado a disciplinas." }, status: :unprocessable_entity
+          end
+        end
+
+        if @user.role == "aluno"
+          student_ids = Student.where(user_id: @user.id).pluck(:id)
+          if Enrollment.where(student_id: student_ids).exists?
+            return render json: { error: "Não é possível excluir este usuário pois ele possui matrículas vinculadas." }, status: :unprocessable_entity
+          end
+        end
+
         @user.update!(active: false)
         head :no_content
       end

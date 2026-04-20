@@ -9,14 +9,14 @@ default: &default
 
 development:
   <<: *default
-  database: federal_concursos_development
+  database: <%= ENV.fetch("DB_NAME", "federal_cursos") %>
 
 test:
   <<: *default
-  database: federal_concursos_test
+  database: <%= ENV.fetch("DB_NAME", "federal_cursos") %>_test
 
 production:
   <<: *default
-  database: federal_concursos_production
+  database: <%= ENV.fetch("DB_NAME_PRODUCTION", "federal_cursos_production") %>
   username: <%= ENV["DB_USERNAME"] %>
   password: <%= ENV["DB_PASSWORD"] %>

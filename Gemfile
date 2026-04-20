@@ -8,12 +8,13 @@ gem "jwt", "~> 2.9"
 gem "rack-cors"
 gem "hexapdf"
 gem "active_model_serializers", "~> 0.10"
-gem "dotenv-rails", groups: [:development, :test]
+gem "dotenv-rails"
 gem "tzinfo-data", platforms: %i[ windows jruby ]
 gem "bootsnap", require: false
 gem "rqrcode"
 gem "chunky_png"
 gem "ransack"
+gem "rack-attack"
 
 group :development, :test do
   gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"

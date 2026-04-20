@@ -1,5 +1,5 @@
 class QuestionMailer < ApplicationMailer
-  default from: "Federal Concursos <noreply@federalconcursos.com.br>"
+  default from: "Federal Cursos <federall@federalcursos.com.br>"
 
   # Notifica o professor que uma nova dúvida foi enviada
   def new_question(question)

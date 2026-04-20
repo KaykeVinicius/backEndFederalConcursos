@@ -7,17 +7,16 @@ module Api
         # GET /api/v1/aluno/lessons/:lesson_id/video_token
         # Retorna o ID do vídeo somente para alunos matriculados com acesso online/híbrido.
         # Chamado apenas quando o aluno vai assistir — não em listagens.
-        def show
-          lesson  = Lesson.find(params[:lesson_id])
+        def video_token
+          lesson  = Lesson.find(params[:id])
           topic   = lesson.topic
           subject = topic.subject
           course  = subject.course
 
-          student = current_user.student
-          return render json: { error: "Aluno não encontrado" }, status: :forbidden unless student
+          return render json: { error: "Aluno não encontrado" }, status: :forbidden if current_student_ids.empty?
 
           enrollment = Enrollment.find_by(
-            student_id: student.id,
+            student_id: current_student_ids,
             course_id:  course.id,
             status:     "active"
           )

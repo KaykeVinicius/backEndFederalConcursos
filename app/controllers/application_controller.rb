@@ -50,6 +50,17 @@ class ApplicationController < ActionController::API
     require_role!(:aluno)
   end
 
+  # Retorna todos os IDs de students vinculados ao usuário atual
+  # (um usuário pode ter mais de um student quando matriculado como ex-aluno)
+  def current_student_ids
+    @current_student_ids ||= Student.where(user_id: current_user.id).pluck(:id)
+  end
+
+  # Retorna o student principal (para operações de escrita)
+  def current_student
+    @current_student ||= Student.where(user_id: current_user.id).first
+  end
+
   def require_admin!
     require_role!(:ceo, :diretor, :equipe_pedagogica, :admin)
   end
