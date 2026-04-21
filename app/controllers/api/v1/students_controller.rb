@@ -5,9 +5,25 @@ module Api
       before_action :set_student, only: [:show, :update, :destroy]
 
       def index
-        q = Student.includes(:user, :city).ransack(params[:q])
+        include_enr = params[:include_enrollments] != "false"
+        includes_list = include_enr ? { user: :user_type, city: {}, enrollments: [:course, :turma] } : { user: :user_type, city: {} }
+        q = Student.includes(includes_list).ransack(params[:q])
         q.sorts = "name asc" if q.sorts.empty?
-        @students = q.result(distinct: true)
+        scope = q.result(distinct: true)
+
+        per_page = params[:per_page].present? ? [[params[:per_page].to_i, 1].max, 2000].min : 10
+        page     = params[:page].present? ? [params[:page].to_i, 1].max : 1
+
+        total = scope.count
+        @students = scope.offset((page - 1) * per_page).limit(per_page)
+
+        response.set_header("X-Total-Count", total.to_s)
+        response.set_header("X-Total-Pages", ((total.to_f / per_page).ceil).to_s)
+        response.set_header("X-Page", page.to_s)
+        response.set_header("X-Per-Page", per_page.to_s)
+        response.set_header("Access-Control-Expose-Headers",
+          "Authorization, X-Total-Count, X-Total-Pages, X-Page, X-Per-Page")
+
         render json: @students, each_serializer: StudentSerializer
       end
 
@@ -68,7 +84,7 @@ module Api
         params.permit(
           :name, :email, :whatsapp, :cpf, :instagram,
           :street, :address_number, :address_complement, :neighborhood, :cep,
-          :internal, :active, :situacao, :city_id
+          :internal, :active, :situacao, :city_id, :birth_date
         )
       end
 
