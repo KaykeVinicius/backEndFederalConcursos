@@ -4,36 +4,42 @@ module Api
       skip_before_action :authenticate_user!
       skip_before_action :verify_authenticity_token rescue nil
 
-      def nupay
-        data           = params.permit(:referenceId, :pspReferenceId, :timestamp, :paymentMethodType).to_h
-        reference_id   = data["referenceId"]
-        psp_reference  = data["pspReferenceId"]
+      def stripe
+        payload    = request.body.read
+        sig_header = request.env["HTTP_STRIPE_SIGNATURE"]
+        secret     = ENV.fetch("STRIPE_WEBHOOK_SECRET", "")
 
-        session = CheckoutSession.find_by(reference_id: reference_id) ||
-                  CheckoutSession.find_by(merchant_order_reference: reference_id)
+        event = Stripe::Webhook.construct_event(payload, sig_header, secret)
 
-        return head :ok unless session
-        return head :ok if session.status_completed?
-
-        nupay  = NupayService.new
-        status = nupay.get_status(psp_reference || session.psp_reference_id)
-
-        if status.dig(:body, "status") == "COMPLETED"
-          ActiveRecord::Base.transaction do
-            session.update!(status: "completed", psp_reference_id: psp_reference || session.psp_reference_id)
-            create_enrollment!(session)
-          end
-        elsif status.dig(:body, "status").in?(%w[CANCELLED ERROR])
-          session.update!(status: "cancelled")
+        case event["type"]
+        when "checkout.session.completed"
+          handle_checkout_completed(event["data"]["object"])
         end
 
         head :ok
+      rescue Stripe::SignatureVerificationError => e
+        Rails.logger.error("Stripe webhook signature invalid: #{e.message}")
+        head :bad_request
       rescue => e
-        Rails.logger.error("Webhook NuPay error: #{e.message}\n#{e.backtrace.first(5).join("\n")}")
+        Rails.logger.error("Stripe webhook error: #{e.message}\n#{e.backtrace.first(5).join("\n")}")
         head :ok
       end
 
       private
+
+      def handle_checkout_completed(stripe_session)
+        reference_id = stripe_session["client_reference_id"] || stripe_session.dig("metadata", "reference_id")
+        session = CheckoutSession.find_by(reference_id: reference_id) ||
+                  CheckoutSession.find_by(psp_reference_id: stripe_session["id"])
+
+        return unless session
+        return if session.status_completed?
+
+        ActiveRecord::Base.transaction do
+          session.update!(status: "completed", psp_reference_id: stripe_session["id"])
+          create_enrollment!(session)
+        end
+      end
 
       def create_enrollment!(session)
         course   = session.course
@@ -61,19 +67,18 @@ module Api
 
         unless student
           student = Student.create!(
-            user:      user,
-            name:      customer["name"],
-            email:     email,
-            cpf:       cpf,
-            whatsapp:  customer["whatsapp"],
-            street:    "#{customer['street']}, #{customer['number']} #{customer['complement']}".strip,
-            internal:  false,
-            active:    true
+            user:     user,
+            name:     customer["name"],
+            email:    email,
+            cpf:      cpf,
+            whatsapp: customer["whatsapp"],
+            internal: false,
+            active:   true
           )
         end
 
-        started_at  = Date.today
-        expires_at  = started_at + session.duration_days.days
+        started_at = Date.today
+        expires_at = started_at + session.duration_days.days
 
         enrollment = Enrollment.create!(
           student:          student,
@@ -82,14 +87,14 @@ module Api
           started_at:       started_at,
           expires_at:       expires_at,
           enrollment_type:  :online,
-          payment_method:   "NuPay",
+          payment_method:   "stripe",
           total_paid_cents: session.amount_cents,
           contract_signed:  false
         )
 
         EnrollmentMailer.confirmation(enrollment, setup_token: setup_token).deliver_later
       rescue => e
-        Rails.logger.error("EnrollmentMailer error: #{e.message}")
+        Rails.logger.error("create_enrollment! error: #{e.message}")
         raise
       end
     end

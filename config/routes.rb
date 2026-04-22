@@ -9,7 +9,7 @@ Rails.application.routes.draw do
       get  "checkout/check_availability",    to: "checkout#check_availability"
 
       # Webhooks externos
-      post "webhooks/nupay", to: "webhooks#nupay"
+      post "webhooks/stripe", to: "webhooks#stripe"
 
       # Auth
       post   "auth/login",                    to: "auth#login"

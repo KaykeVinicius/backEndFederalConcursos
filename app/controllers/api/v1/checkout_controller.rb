@@ -15,24 +15,13 @@ module Api
         return render json: { error: "E-mail inválido." }, status: :unprocessable_entity unless email.match?(/\A[^@\s]+@[^@\s]+\.[^@\s]+\z/)
 
         phone = params[:whatsapp].to_s.gsub(/\D/, "")
-        return render json: { error: "WhatsApp inválido. Digite DDD + número (ex: 69912345678)." }, status: :unprocessable_entity unless phone.length.between?(10, 11)
-
-        required = %w[name street number neighborhood postal_code city state]
-        missing  = required.select { |f| params[f].blank? }
-        return render json: { error: "Campos obrigatórios: #{missing.join(', ')}." }, status: :unprocessable_entity if missing.any?
+        return render json: { error: "WhatsApp inválido." }, status: :unprocessable_entity unless phone.length.between?(10, 11)
 
         customer_data = {
-          name:         params[:name].to_s.strip,
-          cpf:          cpf_digits,
-          email:        email,
-          whatsapp:     phone,
-          street:       params[:street].to_s.strip,
-          number:       params[:number].to_s.strip,
-          complement:   params[:complement].to_s.strip,
-          neighborhood: params[:neighborhood].to_s.strip,
-          postal_code:  params[:postal_code].to_s.gsub(/\D/, ""),
-          city:         params[:city].to_s.strip,
-          state:        params[:state].to_s.strip.upcase
+          name:     params[:name].to_s.strip,
+          cpf:      cpf_digits,
+          email:    email,
+          whatsapp: phone
         }
 
         session = CheckoutSession.create!(
@@ -45,17 +34,13 @@ module Api
           status:                   "pending"
         )
 
-        nupay  = NupayService.new
-        result = nupay.create_payment(checkout_session: session, course: course)
+        result = StripeService.new.create_checkout_session(checkout_session: session, course: course)
 
-        if result[:status] == 200 || result[:status] == 201
-          psp_id      = result[:body]["pspReferenceId"]
-          payment_url = result[:body]["paymentUrl"]
-          session.update!(psp_reference_id: psp_id, payment_url: payment_url)
-          render json: { payment_url: payment_url, reference_id: session.reference_id }, status: :ok
+        if result[:status] == 200
+          session.update!(payment_url: result[:url], psp_reference_id: result[:stripe_session_id])
+          render json: { payment_url: result[:url], reference_id: session.reference_id }, status: :ok
         else
           session.update!(status: "failed")
-          Rails.logger.error("NuPay error: #{result.inspect}")
           render json: { error: "Erro ao iniciar pagamento. Tente novamente." }, status: :unprocessable_entity
         end
       rescue => e
@@ -67,8 +52,8 @@ module Api
         cpf   = params[:cpf].to_s.gsub(/\D/, "")
         email = params[:email].to_s.strip.downcase
 
-        cpf_taken   = cpf.present?   && (User.exists?(cpf: cpf)     || Student.exists?(cpf: cpf))
-        email_taken = email.present? && (User.exists?(email: email)  || Student.exists?(email: email))
+        cpf_taken   = cpf.present?   && (User.exists?(cpf: cpf)    || Student.exists?(cpf: cpf))
+        email_taken = email.present? && (User.exists?(email: email) || Student.exists?(email: email))
 
         render json: { cpf_taken: cpf_taken, email_taken: email_taken }
       end
@@ -77,7 +62,6 @@ module Api
         cpf = params[:cpf].to_s.gsub(/\D/, "")
         return render json: { found: false } unless cpf.length == 11
 
-        # Tenta primeiro no histórico de checkouts concluídos (tem todos os campos)
         session = CheckoutSession
                     .where("customer_data->>'cpf' = ?", cpf)
                     .where(status: "completed")
@@ -86,31 +70,11 @@ module Api
 
         if session
           d = session.customer_data
-          return render json: {
-            found:        true,
-            name:         d["name"],
-            email:        d["email"],
-            whatsapp:     d["whatsapp"],
-            postal_code:  d["postal_code"],
-            street:       d["street"],
-            number:       d["number"],
-            complement:   d["complement"],
-            neighborhood: d["neighborhood"],
-            city:         d["city"],
-            state:        d["state"],
-          }
+          return render json: { found: true, name: d["name"], email: d["email"], whatsapp: d["whatsapp"] }
         end
 
-        # Fallback: aluno cadastrado manualmente (dados básicos)
         student = Student.find_by(cpf: cpf)
-        if student
-          return render json: {
-            found:    true,
-            name:     student.name,
-            email:    student.email,
-            whatsapp: student.whatsapp.to_s,
-          }
-        end
+        return render json: { found: true, name: student.name, email: student.email, whatsapp: student.whatsapp.to_s } if student
 
         render json: { found: false }
       end
