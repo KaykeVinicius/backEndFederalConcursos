@@ -1,6 +1,8 @@
 class Subject < ApplicationRecord
-  belongs_to :course,    optional: true
-  belongs_to :professor, class_name: "User", optional: true
+  belongs_to :course, optional: true
+
+  has_many :professor_subjects, dependent: :destroy
+  has_many :professors, through: :professor_subjects, class_name: "User"
 
   has_many :topics,    dependent: :destroy
   has_many :questions, dependent: :destroy
@@ -15,6 +17,6 @@ class Subject < ApplicationRecord
   end
 
   def self.ransackable_associations(auth_object = nil)
-    %w[course professor]
+    %w[course]
   end
 end

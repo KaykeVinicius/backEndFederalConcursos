@@ -5,7 +5,9 @@ class StripeService
 
   def create_checkout_session(checkout_session:, course:)
     customer = checkout_session.customer_data
-    frontend = ENV.fetch("FRONTEND_URL", "https://federalcursos.com.br")
+    frontend = Rails.env.production? \
+               ? ENV.fetch("FRONTEND_URL",     "https://federalcursos.com.br") \
+               : ENV.fetch("FRONTEND_URL_POC", "https://poc.federalcursos.com.br")
 
     session = Stripe::Checkout::Session.create({
       payment_method_types: %w[card],

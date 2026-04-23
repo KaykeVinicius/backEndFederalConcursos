@@ -73,11 +73,12 @@ module Api
 
           # Padrão: apenas as aulas do próprio professor
           # 3 formas de vínculo: diretamente na aula, via turma, ou via matéria
+          prof_subject_ids = ProfessorSubject.where(professor_id: current_user.id).pluck(:subject_id)
           base.joins(:turma).left_joins(:subject).where(
             "(turma_class_days.professor_id = :uid) OR " \
             "(turma_class_days.professor_id IS NULL AND turmas.professor_id = :uid) OR " \
-            "(turma_class_days.professor_id IS NULL AND subjects.professor_id = :uid)",
-            uid: current_user.id
+            "(turma_class_days.professor_id IS NULL AND subjects.id IN (:sids))",
+            uid: current_user.id, sids: prof_subject_ids.presence || [0]
           )
 
         when "aluno"

@@ -9,7 +9,7 @@ class UserSerializer < ActiveModel::Serializer
     ut ? { id: ut.id, name: ut.name, slug: ut.slug } : nil
   end
 
-  attribute :student, if: -> { object.role == "aluno" } do
+  attribute :student, if: -> { object.aluno? } do
     s = object.student
     s ? { id: s.id, situacao: s.situacao } : nil
   end

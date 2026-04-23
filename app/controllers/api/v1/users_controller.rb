@@ -5,7 +5,7 @@ module Api
       before_action :set_user, only: [:show, :update, :destroy]
 
       def index
-        q = User.ransack(params[:q])
+        q = User.includes(:user_type).ransack(params[:q])
         q.sorts = "name asc" if q.sorts.empty?
         @users = q.result(distinct: true)
         render json: @users, each_serializer: UserSerializer
@@ -34,7 +34,7 @@ module Api
 
       def destroy
         if @user.role == "professor"
-          if Subject.exists?(professor_id: @user.id)
+          if ProfessorSubject.exists?(professor_id: @user.id)
             return render json: { error: "Não é possível excluir este professor pois ele está vinculado a disciplinas." }, status: :unprocessable_entity
           end
         end
@@ -53,15 +53,15 @@ module Api
       private
 
       def set_user
-        @user = User.find(params[:id])
+        @user = User.includes(:user_type).find(params[:id])
       end
 
       def user_params
-        params.permit(:name, :email, :cpf, :password, :role, :commission_percent, :active, :user_type_id)
+        params.permit(:name, :email, :cpf, :password, :commission_percent, :active, :user_type_id)
       end
 
       def update_params
-        p = params.permit(:name, :email, :cpf, :password, :role, :commission_percent, :active, :user_type_id)
+        p = params.permit(:name, :email, :cpf, :password, :commission_percent, :active, :user_type_id)
         p.delete(:password) if p[:password].blank?
         p
       end

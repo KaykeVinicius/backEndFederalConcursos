@@ -1,5 +1,5 @@
 class Enrollment < ApplicationRecord
-  enum :status,          { active: 0, canceled: 1, expired: 2 }
+  enum :status,          { active: 0, canceled: 1, expired: 2, suspended: 3 }
   enum :enrollment_type, { presencial: 0, online: 1, hibrido: 2 }
 
   belongs_to :student

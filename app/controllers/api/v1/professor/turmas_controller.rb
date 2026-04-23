@@ -47,9 +47,8 @@ module Api
           direto = Turma.where(professor_id: professor_id).pluck(:id)
 
           # 2. tem matéria cadastrada no curso da turma
-          course_ids = Subject.where(professor_id: professor_id)
-                              .where.not(course_id: nil)
-                              .pluck(:course_id)
+          subject_ids = ProfessorSubject.where(professor_id: professor_id).pluck(:subject_id)
+          course_ids  = Subject.where(id: subject_ids).where.not(course_id: nil).pluck(:course_id)
           via_subject = Turma.where(course_id: course_ids).pluck(:id)
 
           # 3. está em algum dia letivo da turma

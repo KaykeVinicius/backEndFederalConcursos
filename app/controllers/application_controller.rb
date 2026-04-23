@@ -13,7 +13,7 @@ class ApplicationController < ActionController::API
 
     begin
       payload = JsonWebToken.decode(token)
-      @current_user = User.find(payload[:user_id])
+      @current_user = User.includes(:user_type).find(payload[:user_id])
 
       unless @current_user.active?
         render json: { error: "Usuário inativo" }, status: :unauthorized and return

@@ -6,18 +6,17 @@ module Api
 
         def index
           professor = current_user
-          subjects  = Subject.where(professor_id: professor.id)
+          subjects  = professor.subjects_taught
 
-          # mesma lógica do TurmasController — vinculação direta, matéria ou dia letivo
           direto        = Turma.where(professor_id: professor.id).pluck(:id)
           course_ids    = subjects.where.not(course_id: nil).pluck(:course_id)
           via_subject   = Turma.where(course_id: course_ids).pluck(:id)
           via_class_day = TurmaClassDay.where(professor_id: professor.id).pluck(:turma_id)
           turma_ids     = (direto + via_subject + via_class_day).uniq
 
-          turmas   = Turma.where(id: turma_ids, modalidade: %w[presencial hibrido])
+          turmas         = Turma.where(id: turma_ids, modalidade: %w[presencial hibrido])
           all_course_ids = (turmas.pluck(:course_id) + subjects.pluck(:course_id)).uniq.compact
-          courses  = Course.where(id: all_course_ids)
+          courses        = Course.where(id: all_course_ids)
 
           pending_questions = Question.where(professor_id: professor.id, status: :pending)
 

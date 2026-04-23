@@ -7,7 +7,7 @@ module Api
         # GET /api/v1/professor/event_materials
         # Retorna aulões que têm a matéria do professor + materiais já enviados
         def index
-          professor_subject_ids = Subject.where(professor_id: current_user.id).pluck(:id)
+          professor_subject_ids = current_user.subjects_taught.pluck(:id)
 
           # Aulões que incluem a matéria deste professor
           events = Event.aulao
@@ -49,7 +49,7 @@ module Api
         # POST /api/v1/professor/event_materials
         def create
           event   = Event.find(params[:event_id])
-          subject = Subject.where(professor_id: current_user.id).find(params[:subject_id])
+          subject = current_user.subjects_taught.find(params[:subject_id])
 
           # Garante que a matéria está vinculada ao evento
           unless event.event_subjects.exists?(subject_id: subject.id)

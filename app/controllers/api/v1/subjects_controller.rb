@@ -11,10 +11,9 @@ module Api
         base = if params[:course_id]
           Subject.where(course_id: params[:course_id])
         else
-          # pool global: apenas templates sem vínculo a curso
           Subject.where(course_id: nil)
         end
-        q = base.includes(:professor).ransack(params[:q])
+        q = base.includes(:professors).ransack(params[:q])
         q.sorts = "name asc" if q.sorts.empty?
         @subjects = q.result(distinct: true)
         render json: @subjects, each_serializer: SubjectSerializer
@@ -24,22 +23,20 @@ module Api
         render json: @subject, serializer: SubjectSerializer
       end
 
-      # POST /courses/:course_id/subjects → cria matéria para o curso (com nome do template)
-      # POST /subjects                    → cria template global (sem course_id)
       def create
-        if params[:course_id]
-          @subject = Subject.new(
-            course_id:    params[:course_id],
-            name:         params[:name],
-            description:  params[:description],
-            professor_id: params[:professor_id],
-            position:     Subject.where(course_id: params[:course_id]).count + 1
+        @subject = if params[:course_id]
+          Subject.new(
+            course_id:   params[:course_id],
+            name:        params[:name],
+            description: params[:description],
+            position:    Subject.where(course_id: params[:course_id]).count + 1
           )
         else
-          @subject = Subject.new(subject_params)
+          Subject.new(subject_params)
         end
 
         if @subject.save
+          sync_professors(@subject)
           render json: @subject, serializer: SubjectSerializer, status: :created
         else
           render json: { errors: @subject.errors.full_messages }, status: :unprocessable_entity
@@ -48,6 +45,7 @@ module Api
 
       def update
         if @subject.update(subject_params)
+          sync_professors(@subject)
           render json: @subject, serializer: SubjectSerializer
         else
           render json: { errors: @subject.errors.full_messages }, status: :unprocessable_entity
@@ -68,11 +66,28 @@ module Api
       private
 
       def set_subject
-        @subject = Subject.find(params[:id])
+        @subject = Subject.includes(:professors).find(params[:id])
       end
 
       def subject_params
-        params.permit(:course_id, :professor_id, :name, :description, :position)
+        params.permit(:course_id, :name, :description, :position)
+      end
+
+      # Syncs professors when professor_ids or professor_id is provided
+      def sync_professors(subject)
+        if params.key?(:professor_ids)
+          ids = Array(params[:professor_ids]).map(&:to_i).uniq
+          subject.professor_ids = ids
+        elsif params.key?(:professor_id)
+          pid = params[:professor_id]
+          if pid.nil? || pid.to_s.empty?
+            # Remove all professors
+            subject.professor_subjects.destroy_all
+          else
+            pid = pid.to_i
+            subject.professor_subjects.find_or_create_by!(professor_id: pid)
+          end
+        end
       end
     end
   end
