@@ -15,7 +15,7 @@ gem "rqrcode"
 gem "chunky_png"
 gem "ransack"
 gem "rack-attack"
-gem "stripe", "~> 13.0"
+gem "stripe", "~> 19.1"
 
 group :development, :test do
   gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"
