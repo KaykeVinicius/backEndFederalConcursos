@@ -90,7 +90,10 @@ Rails.application.routes.draw do
         resources :event_materials,     only: [:index]
         resources :lessons,             only: [:index]
         resources :materials,           only: [:index] do
-          member { get :download }
+          member do
+            get  :download
+            post :request_download
+          end
         end
         resources :lesson_pdfs,        only: [] do
           member { get :download }

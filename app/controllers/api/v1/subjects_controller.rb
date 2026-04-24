@@ -53,11 +53,14 @@ module Api
       end
 
       def destroy
-        if @subject.course_id.present?
-          return render json: { error: "Não é possível excluir esta disciplina pois ela está vinculada a um curso." }, status: :unprocessable_entity
-        end
-        if @subject.topics.exists?
+        # Protege template global com tópicos/aulas
+        if @subject.course_id.nil? && @subject.topics.exists?
           return render json: { error: "Não é possível excluir esta disciplina pois ela possui tópicos e aulas cadastradas." }, status: :unprocessable_entity
+        end
+        # Bloqueia se professor já lançou material nessa disciplina do curso
+        if @subject.materials.exists?
+          count = @subject.materials.count
+          return render json: { error: "Não é possível excluir: o professor já lançou #{count} material(is) nessa disciplina. Remova os materiais antes." }, status: :unprocessable_entity
         end
         @subject.destroy
         head :no_content
